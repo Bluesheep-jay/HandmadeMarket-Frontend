@@ -1,26 +1,20 @@
 <template>
   <div class="registration-container q-pa-md">
-    <q-stepper
-      v-model="step"
-      ref="stepper"
-      color="primary"
-      animated
-      flat
-    >
-      <q-step :name="1" title="Basic Information" icon="store" :done="step > 1">
+    <q-stepper v-model="step" ref="stepper" color="primary" animated flat>
+      <q-step :name="1" title="Thông tin shop" icon="info" :done="step > 1">
         <Step1Regis :formData="formData" @next="nextStep" />
       </q-step>
 
       <q-step
         :name="2"
-        title="Location & Contact"
-        icon="location_on"
+        title="Thông tin thuế và định danh"
+        icon="remember_me"
         :done="step > 2"
       >
         <Step2Regis :formData="formData" @next="nextStep" @back="step--" />
       </q-step>
 
-      <q-step :name="3" title="Store Settings" icon="settings">
+      <q-step :name="3" title="Hoàn tất" icon="verified_user">
         <Step3Regis :formData="formData" @back="step--" @submit="submitForm" />
       </q-step>
     </q-stepper>
@@ -28,28 +22,44 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import { useQuasar } from "quasar";
-import Step1Regis from "../components/Step1Regis.vue";
-import Step2Regis from "../components/Step2Regis.vue";
-import Step3Regis from "../components/Step3Regis.vue";
+import { useRoute, useRouter } from "vue-router";
+import Step1Regis from "../../components/Step1Regis.vue";
+import Step2Regis from "../../components/Step1Regis.vue";
+import Step3Regis from "../../components/Step1Regis.vue";
+import usersService from "../../services/users.service";
 
 const $q = useQuasar();
 const step = ref(1);
+const router = useRouter();
 
+const userEmail = ref(localStorage.getItem("userEmail"));
+const userInfo = ref(null);
 const formData = ref({
-  storeName: "",
-  description: "",
-  category: null,
-  address: "",
-  city: "",
-  phone: "",
+  shopName: "",
+  shopDescription: "",
+  fullName: "",
+  provinceId: "",
+  districtId: "",
+  wardId: "",
+  specificAddress: "",
+  phoneNumber: "",
   email: "",
-  logo: null,
-  currency: null,
-  shippingEnabled: false,
 });
 
+onBeforeMount(async () => {
+  try {
+    userInfo.value = await usersService.getUserByEmail(userEmail.value);
+    if (userInfo.value.shopId) {
+      localStorage.setItem("shopId", userInfo.value.shopId);
+      router.push("/shop");
+    }
+    formData.value.userId = userInfo.value.id;
+  } catch (error) {
+    console.log(error);
+  }
+});
 const nextStep = () => {
   step.value++;
 };

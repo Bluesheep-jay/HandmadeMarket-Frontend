@@ -1,6 +1,5 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    
     <q-page-container class="page-container">
       <section class="q-pa-md">
         <div class="row q-col-gutter-md">
@@ -140,13 +139,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref, watch } from "vue";
-
-import categoryService from "../services/category.service";
-
-import ProfileDropdown from "../components/ProfileDropdown.vue";
-import WishListView from "./WishListView.vue";
-import Header from "../components/Header.vue";
+import { ref } from "vue";
 
 const listGiftForHim = ref([
   { id: 1, img: "https://cdn.quasar.dev/img/parallax1.jpg" },
@@ -165,8 +158,6 @@ const listJewelry = ref([
   { id: 6, img: "https://cdn.quasar.dev/img/mountains.jpg" },
   { id: 7, img: "https://cdn.quasar.dev/img/mountains.jpg" },
 ]);
-
-
 </script>
 
 <style scoped>

@@ -89,7 +89,7 @@ import { useQuasar } from "quasar";
 import { jwtDecode } from "jwt-decode";
 import { useNotification } from "@kyvg/vue3-notification";
 
-import usersService from "../services/users.service";
+import usersService from "../../services/users.service";
 
 const { notify } = useNotification();
 const token = localStorage.getItem("token");

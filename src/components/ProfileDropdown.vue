@@ -1,7 +1,13 @@
 <template>
-  <q-btn-dropdown  mini-fab rounded dense class="profile-dropdown" dropdown-icon="none">
+  <q-btn-dropdown
+    mini-fab
+    rounded
+    dense
+    class="profile-dropdown"
+    dropdown-icon="none"
+  >
     <template v-slot:label>
-      <q-avatar size="32px" v-if="userInfo" >
+      <q-avatar size="32px" v-if="userInfo">
         <img
           :src="userInfo.avatarUrl || 'https://cdn.quasar.dev/img/avatar.png'"
           alt=""
@@ -36,28 +42,28 @@
       <!-- Menu Items -->
       <q-item clickable v-ripple>
         <q-item-section avatar>
-          <q-icon name="rate_review" />
+          <q-icon class="icon" name="rate_review" />
         </q-item-section>
         <q-item-section>Purchases and reviews</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple>
         <q-item-section avatar>
-          <q-icon name="chat" />
+          <q-icon class="icon" name="chat" />
         </q-item-section>
         <q-item-section>Messages</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple>
         <q-item-section avatar>
-          <q-icon name="local_offer" />
+          <q-icon class="icon" name="local_offer" />
         </q-item-section>
         <q-item-section>Special offers</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple>
         <q-item-section avatar>
-          <q-icon name="card_giftcard" />
+          <q-icon class="icon" name="card_giftcard" />
         </q-item-section>
         <q-item-section>Etsy Registry</q-item-section>
       </q-item>
@@ -66,14 +72,14 @@
 
       <q-item clickable v-ripple>
         <q-item-section avatar>
-          <q-icon name="settings" />
+          <q-icon class="icon" name="settings" />
         </q-item-section>
         <q-item-section>Account settings</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple class="text-negative">
         <q-item-section avatar>
-          <q-icon name="logout" />
+          <q-icon class="icon" name="exit_to_app" />
         </q-item-section>
         <q-item-section>Sign out</q-item-section>
       </q-item>
@@ -87,7 +93,7 @@ import { jwtDecode } from "jwt-decode";
 import { useRouter } from "vue-router";
 import usersService from "../services/users.service";
 
-const router = useRouter()
+const router = useRouter();
 const token = localStorage.getItem("token");
 const decoded = jwtDecode(token);
 
@@ -95,13 +101,13 @@ const userInfo = ref(null);
 const userEmail = ref(decoded.sub);
 
 onBeforeMount(async () => {
+  localStorage.setItem("userEmail", userEmail.value)
   userInfo.value = await usersService.getUserByEmail(userEmail.value);
-
 });
 
 function goToProfile() {
-  router.push("/profile");
-};
+  router.push("/customer/profile");
+}
 </script>
 
 <style scoped>
@@ -114,6 +120,9 @@ function goToProfile() {
 .profile-menu {
   border-radius: 8px;
 
+  .icon {
+    /* color: var(--icon); */
+  }
   .profile-header {
     padding: 12px 16px;
   }

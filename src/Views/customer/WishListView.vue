@@ -29,7 +29,7 @@
               <q-icon name="public" size="xs" />
               <span class="text-caption">Public</span>
               <span class="text-caption">1 item</span>
-              <q-btn flat dense padding="none" label="Edit" color="primary" to="/profile-editing" />
+              <q-btn flat dense padding="none" label="Edit" color="primary" to="/customer/profile-editing" />
             </div>
             <div class="text-caption q-mt-xs">
               Owner of
@@ -126,7 +126,7 @@
 import { onBeforeMount, ref } from "vue";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "vue-router";
-import usersService from "../services/users.service";
+import usersService from "../../services/users.service";
 
 const router = useRouter();
 const token = localStorage.getItem("token");

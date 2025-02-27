@@ -97,7 +97,7 @@ const onSubmit = async () => {
         type: "success",
         duration: 2000,
       });
-      router.push("/");
+      router.push("/customer");
     } catch (error) {
       notify({
         title: "Error",

@@ -2,7 +2,7 @@
   <div>
     <q-header elevated class="bg-white text-black">
       <q-toolbar class="toolbar-container">
-        <q-btn flat no-caps class="text-orange-8 text-h5" label="BLUE" />
+        <q-btn dense flat class="logo" label="Hmm" no-caps to="/customer" />
 
         <!-- Categories Dropdown -->
         <q-btn-dropdown flat label="Danh mục" class="">
@@ -20,25 +20,31 @@
 
         <!-- Search Bar -->
         <q-input
-          outlined
-          dense
+          rounded
+          borderless
           v-model="searchText"
           placeholder="Nhập để tìm kiếm sản phẩm ..."
           class="search-input"
         >
           <template v-slot:append>
-            <q-icon name="search" />
+            <q-icon class="search-icon" name="search" />
           </template>
         </q-input>
 
         <!-- Action Icons -->
         <div class="action-icon-container">
-          <q-btn flat round icon="favorite" />
-          <q-btn flat round icon="card_giftcard" />
-          <q-btn flat round icon="notifications_none" />
-          <q-btn flat round icon="shopping_cart" />
+          <q-btn class="icon" flat round icon="favorite" />
+          <q-btn class="icon" flat round icon="card_giftcard" />
+          <q-btn class="icon" flat round icon="notifications_none" />
+          <q-btn class="icon" flat round icon="shopping_cart" />
           <ProfileDropdown />
-          <q-btn flat round icon="store" to="/store-registration" />
+          <q-btn
+            class="icon"
+            flat
+            round
+            icon="store"
+            to="/customer/store-registration"
+          />
         </div>
       </q-toolbar>
 
@@ -77,16 +83,35 @@ onBeforeMount(async () => {
 
 <style scoped>
 .toolbar-container {
+  .logo {
+    font-size: 35px;
+    color: var(--icon);
+  }
+
   .search-input {
     margin-left: 10px;
     width: 100%;
+    border: 2px solid var(--icon);
+    border-radius: 30px;
+    padding: 0 9px 0 20px;
+    .search-icon {
+      background: var(--icon);
+      color: white;
+      border-radius: 50%;
+      padding: 8px;
+    }
   }
+
   .action-icon-container {
     margin-left: 30px;
     margin-right: 10px;
     min-width: fit-content;
     display: flex;
     gap: 10px;
+
+    .icon {
+      /* color: var(--icon); */
+    }
   }
 }
 </style>
