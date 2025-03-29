@@ -26,8 +26,8 @@ import { onBeforeMount, ref } from "vue";
 import { useQuasar } from "quasar";
 import { useRoute, useRouter } from "vue-router";
 import Step1Regis from "../../components/Step1Regis.vue";
-import Step2Regis from "../../components/Step1Regis.vue";
-import Step3Regis from "../../components/Step1Regis.vue";
+import Step2Regis from "../../components/Step2Regis.vue";
+import Step3Regis from "../../components/Step3Regis.vue";
 import usersService from "../../services/users.service";
 
 const $q = useQuasar();
@@ -43,6 +43,9 @@ const formData = ref({
   provinceId: "",
   districtId: "",
   wardId: "",
+  provinceName: "",
+  districtName: "",
+  wardName: "",
   specificAddress: "",
   phoneNumber: "",
   email: "",

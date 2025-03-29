@@ -1,7 +1,7 @@
 <template>
   <div class="container" v-if="shopInfo">
     <div class="content-container">
-      <div class="title">Thông tin thuế và định danh người dùng</div>
+      <div class="title">Thông tin cơ bản</div>
 
       <div class="shop-avatar-container">
         <div class="field-container">
@@ -40,7 +40,7 @@
         </div>
       </div>
       <div class="field-container">
-        <div class="custom-text">Tên người dùng</div>
+        <div class="custom-text">Tên Shop</div>
         <div class="input-container">
           <q-input
             outlined

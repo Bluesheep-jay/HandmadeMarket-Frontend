@@ -33,39 +33,32 @@
         </q-item-section>
         <q-item-section>
           <q-item-label>{{ userInfo.username }}</q-item-label>
-          <q-item-label caption>View your profile</q-item-label>
+          <q-item-label caption>Xem tài khoản</q-item-label>
         </q-item-section>
       </q-item>
 
       <q-separator />
 
       <!-- Menu Items -->
-      <q-item clickable v-ripple>
+      <q-item clickable v-ripple to="/customer/order-and-review">
         <q-item-section avatar>
           <q-icon class="icon" name="rate_review" />
         </q-item-section>
-        <q-item-section>Purchases and reviews</q-item-section>
+        <q-item-section>Đơn hàng và đánh giá</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple>
         <q-item-section avatar>
           <q-icon class="icon" name="chat" />
         </q-item-section>
-        <q-item-section>Messages</q-item-section>
-      </q-item>
-
-      <q-item clickable v-ripple>
-        <q-item-section avatar>
-          <q-icon class="icon" name="local_offer" />
-        </q-item-section>
-        <q-item-section>Special offers</q-item-section>
+        <q-item-section>Tin nhắn</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple>
         <q-item-section avatar>
           <q-icon class="icon" name="card_giftcard" />
         </q-item-section>
-        <q-item-section>Etsy Registry</q-item-section>
+        <q-item-section>Đơn hàng đặt biệt</q-item-section>
       </q-item>
 
       <q-separator />
@@ -74,14 +67,20 @@
         <q-item-section avatar>
           <q-icon class="icon" name="settings" />
         </q-item-section>
-        <q-item-section>Account settings</q-item-section>
+        <q-item-section>Cài đặt tài khoản</q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple class="text-negative">
+      <q-item
+        clickable
+        v-ripple
+        class="text-negative"
+        @click="clearLocalStorage"
+        to="/login"
+      >
         <q-item-section avatar>
           <q-icon class="icon" name="exit_to_app" />
         </q-item-section>
-        <q-item-section>Sign out</q-item-section>
+        <q-item-section>Đăng xuất</q-item-section>
       </q-item>
     </q-list>
   </q-btn-dropdown>
@@ -101,10 +100,16 @@ const userInfo = ref(null);
 const userEmail = ref(decoded.sub);
 
 onBeforeMount(async () => {
-  localStorage.setItem("userEmail", userEmail.value)
+  localStorage.setItem("userEmail", userEmail.value);
   userInfo.value = await usersService.getUserByEmail(userEmail.value);
+  localStorage.setItem("userRole", userInfo.value.enumRole);
+  localStorage.setItem("cartId", userInfo.value.cartId);
+  localStorage.setItem("userId", userInfo.value.id);
 });
 
+function clearLocalStorage() {
+  localStorage.clear();
+}
 function goToProfile() {
   router.push("/customer/profile");
 }

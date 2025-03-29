@@ -11,6 +11,9 @@ export default defineConfig({
       // sassVariables: "src/quasar-variables.sass",
     })
   ],
+  optimizeDeps: {
+    exclude: ['@ffmpeg/ffmpeg'], 
+  },
   
   server:{
     port:3000

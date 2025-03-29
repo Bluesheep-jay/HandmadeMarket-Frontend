@@ -1,15 +1,5 @@
 <template>
-  <!-- <q-layout view="hHh LpR fFf"> -->
-    <q-layout view="hHh Lpr lff">
-
-    <!-- <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      :width="240"
-      :breakpoint="500"
-    > -->
-
+  <q-layout view="hHh Lpr lff">
     <q-drawer
       v-model="drawer"
       show-if-above
@@ -18,7 +8,6 @@
       :width="240"
       :breakpoint="500"
       bordered
-      
     >
       <div class="q-mini-drawer-hide absolute" style="top: 15px; right: -17px">
         <q-btn
@@ -30,40 +19,41 @@
           @click="collapseHandler"
         />
       </div>
-      <div class="logo-container">
+      <q-item class="logo-container" to="/customer">
         <div :class="['logo', { 'collapsed-logo': miniState }]">Hmm</div>
-      </div>
-
-      <q-expansion-item expand-separator default-opened>
-        <template v-slot:header>
-          <q-item-section avatar>
-            <q-avatar size="35px" class="avatar" v-if="shopInfo">
-              <img
-                :src="
-                  shopInfo.shopAvatarUrl ||
-                  'https://cdn.quasar.dev/img/avatar.png'
-                "
-                alt=""
-              />
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Quản Lý Tài Khoản</q-item-label>
-          </q-item-section>
-        </template>
-
-        <q-list class="q-pl-lg">
-          <q-item clickable v-ripple to="/shop">
-            <q-item-section>Thông tin cửa hàng</q-item-section>
-          </q-item>
-          <q-item clickable v-ripple to="/shop/identify">
-            <q-item-section>Thông tin thuế và định danh</q-item-section>
-          </q-item>
-        </q-list>
-      </q-expansion-item>
+      </q-item>
 
       <q-list padding>
-        <!-- Order Management -->
+        <q-expansion-item expand-separator default-opened>
+          <template v-slot:header>
+            <q-item-section avatar>
+              <q-avatar size="35px" class="avatar" v-if="shopInfo">
+                <img
+                  :src="
+                    shopInfo.shopAvatarUrl ||
+                    'https://cdn.quasar.dev/img/avatar.png'
+                  "
+                  alt=""
+                />
+              </q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Quản Lý Tài Khoản</q-item-label>
+            </q-item-section>
+          </template>
+
+          <q-list class="q-pl-lg">
+            <q-item clickable v-ripple to="/shop">
+              <q-item-section>Thông tin cửa hàng</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple to="/shop/identify">
+              <q-item-section>Thông tin thuế và định danh</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple to="/shop/address">
+              <q-item-section>Thông tin địa chỉ</q-item-section>
+            </q-item>
+          </q-list>
+        </q-expansion-item>
         <q-expansion-item
           expand-separator
           icon="inventory_2"
@@ -71,19 +61,28 @@
           default-opened
         >
           <q-list class="q-pl-lg">
-            <q-item clickable v-ripple>
-              <q-item-section>Tất cả</q-item-section>
+            <q-item clickable v-ripple to="/shop/order-management">
+              <q-item-section>Đơn chờ duyệt và hoàn thành</q-item-section>
             </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section>Giao Hàng Loạt</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section>Bản Giao Đơn Hàng</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
+            <q-item clickable v-ripple to="/shop/canceled-order-management">
               <q-item-section
                 >Đơn Trả hàng/Hoàn tiền hoặc Đơn hủy</q-item-section
               >
+            </q-item>
+          </q-list>
+        </q-expansion-item>
+        <q-expansion-item
+          expand-separator
+          icon="point_of_sale"
+          label="Giao dịch và doanh thu"
+          default-opened
+        >
+          <q-list class="q-pl-lg">
+            <q-item clickable v-ripple to="/shop/transaction-management">
+              <q-item-section>Giao dịch</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple to="/shop/revenue-management">
+              <q-item-section>Thống kê</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>

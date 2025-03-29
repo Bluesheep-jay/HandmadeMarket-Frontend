@@ -77,7 +77,6 @@ const isValidEmail = (val) => {
   return emailPattern.test(val) || "Invalid email";
 };
 
-
 const onSubmit = async () => {
   if (isValidEmail(email.value) === true && password.value.length >= 0) {
     loginObj.value = {
@@ -85,7 +84,7 @@ const onSubmit = async () => {
       password: password.value,
     };
     try {
-      authStore.clearToken()
+      authStore.clearToken();
       const token = await registerService.login(loginObj.value);
 
       if (token) {
@@ -99,6 +98,7 @@ const onSubmit = async () => {
       });
       router.push("/customer");
     } catch (error) {
+      console.error(error);
       notify({
         title: "Error",
         text: "Lỗi đăng nhập",
@@ -109,7 +109,6 @@ const onSubmit = async () => {
   }
 };
 </script>
-
 
 <style scoped>
 .container {
@@ -131,9 +130,8 @@ const onSubmit = async () => {
     }
     .register-btn-container {
       text-align: center;
-      .register-link-container{
+      .register-link-container {
         padding-top: 10px;
-
       }
       .register-link {
         top: 0;

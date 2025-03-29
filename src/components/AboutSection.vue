@@ -15,15 +15,23 @@
 
     <div class="form-group">
       <label for="category">Phân loại sản phẩm</label>
-      <select id="category" v-model="productData.categoryId" class="form-input">
-        <option
-          v-for="category in categoryList"
-          :key="category.id"
-          :value="category.id"
-        >
-          {{ category.categoryName }}
-        </option>
-      </select>
+      <div class="cate-container">
+        <q-select
+          v-for="(category, index) in selectedCategories"
+          :key="index"
+          dense
+          outlined
+          v-model="selectedCategories[index]"
+          :options="categoryOptions[index]"
+          option-label="categoryName"
+          option-value="id"
+          emit-value
+          map-options
+          :label="'Phân loại cấp ' + (index + 1)"
+          class="cate-input"
+          @update:model-value="(value) => fetchSubCategories(index, value)"
+        />
+      </div>
     </div>
 
     <div class="form-group">
@@ -44,7 +52,7 @@
       }}
     </button>
 
-    <div class="form-group" v-if="hasPersonalization">
+    <div class="form-group" v-if="hasPersonalization" >
       <label for="description">Hướng dẫn cho người mua</label>
       <textarea
         id="description"
@@ -55,29 +63,57 @@
       ></textarea>
     </div>
   </div>
+
+  
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import categoryService from "../services/category.service";
 
 const props = defineProps({ productData: Object });
 
-const categoryList = ref([]);
 const hasPersonalization = ref(false);
+const selectedCategories = ref([]);
+const categoryOptions = ref([]);
 
 onBeforeMount(async () => {
   try {
     props.productData.shopId = localStorage.getItem("shopId");
-    categoryList.value = await categoryService.getAll();
+    const rootCategories = await categoryService.getRootCategory();
+    categoryOptions.value.push(rootCategories);
+    selectedCategories.value.push("");
   } catch (error) {
     console.log(error);
   }
 });
 
+async function fetchSubCategories(index, selectedCategoryId) {
+  try {
+    console.log();
+    // Xóa các danh mục cấp thấp hơn nếu chọn lại cấp trên
+    selectedCategories.value = selectedCategories.value.slice(0, index + 1);
+    categoryOptions.value = categoryOptions.value.slice(0, index + 1);
+
+    // Gọi API lấy danh mục con
+    const subCategories = await categoryService.getSubCategories(
+      selectedCategoryId
+    );
+
+    if (subCategories.length > 0) {
+      categoryOptions.value.push(subCategories);
+      selectedCategories.value.push("");
+    } else {
+      props.productData.categoryId = selectedCategories.value[index];
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 function togglePersonalization() {
   hasPersonalization.value = !hasPersonalization.value;
-  // console.log(props.productData)
+  
 }
 </script>
 
@@ -110,6 +146,17 @@ function togglePersonalization() {
     .form-input:focus {
       outline: none;
       border-color: #222;
+    }
+    .cate-container {
+      display: flex;
+      gap: 10px;
+      .cate-input {
+        width: 250px;
+        padding: 0.75rem;
+        /* border: 1px solid #e1e1e1;
+        border-radius: 6px;
+        font-size: 16px; */
+      }
     }
   }
 

@@ -5,9 +5,20 @@ class CategoryService {
     this.path = "categories";
   }
 
-  async getAll() {
-    const res = await api.get(`${this.path}`);
-    return res.data;
+  async getRootCategory(){
+    const res = (await api.get(`${this.path}/roots`)).data
+    return res
+  }
+
+  async getSubCategories(parentId){
+    const res = (await api.get(`${this.path}/subcategories/${parentId}`)).data
+    return res
+  }
+
+
+  async getAllParentCategories(categoryId){
+    const res = (await api.get(`${this.path}/all-parents/${categoryId}`)).data
+    return res
   }
 
   async create() {

@@ -12,7 +12,7 @@
         <span class="currency">đ</span>
         <input
           id="price"
-          v-model="price"
+          v-model="productData.basePrice"
           type="number"
           min="0"
           step="1"
@@ -27,7 +27,7 @@
       <div class="price-input">
         <input
           id="quantity"
-          v-model="quantity"
+          v-model="productData.baseQuantity"
           type="number"
           min="1"
           class="form-input"
@@ -105,7 +105,6 @@
             <div class="name-cell">{{ variations[0].name }}</div>
             <div class="price-cell">Giá</div>
             <div class="quantity-cell">Số lượng</div>
-            <div class="visible-cell">Hiển thị</div>
           </div>
 
           <div
@@ -143,15 +142,6 @@
                 placeholder="0"
               />
             </div>
-            <div class="visible-cell">
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  v-model="singleVariationVisibility[index]"
-                />
-                <span class="slider"></span>
-              </label>
-            </div>
           </div>
         </div>
 
@@ -162,7 +152,6 @@
             <div class="name-cell">{{ variations[1].name }}</div>
             <div class="price-cell">Giá</div>
             <div class="quantity-cell">Số lượng</div>
-            <div class="visible-cell">Hiển thị</div>
           </div>
 
           <div
@@ -200,12 +189,6 @@
                 class="form-input"
                 placeholder="0"
               />
-            </div>
-            <div class="visible-cell">
-              <label class="switch">
-                <input type="checkbox" v-model="combinationVisibility[index]" />
-                <span class="slider"></span>
-              </label>
             </div>
           </div>
         </div>
@@ -279,6 +262,9 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 
+defineExpose({transferToVariationList})
+const props = defineProps({ productData: Object });
+
 const price = ref("");
 const quantity = ref(1);
 const hasVariations = ref(false);
@@ -293,10 +279,8 @@ const editingIndex = ref(-1);
 
 const singleVariationPrices = ref([]);
 const singleVariationQuantities = ref([]);
-const singleVariationVisibility = ref([]);
 const combinationPrices = ref([]);
 const combinationQuantities = ref([]);
-const combinationVisibility = ref([]);
 const selectedCombinations = ref([]);
 
 const combinationsList = computed(() => {
@@ -314,6 +298,35 @@ const combinationsList = computed(() => {
   return combinations;
 });
 
+function transferToVariationList() {
+  if (variations.value.length == 1) {
+    const tempVariationList = variations.value[0].options.map(
+      (option, index) => ({
+        attributes: { [variations.value[0].name]: option },
+        price: singleVariationPrices.value[index],
+        stock: singleVariationQuantities.value[index],
+      })
+    );
+
+    props.productData.variationList = tempVariationList;
+    console.log(props.productData);
+  }
+  if (variations.value.length == 2) {
+    const tempVariationList = combinationsList.value.map(
+      (combination, index) => ({
+        attributes: {
+          [variations.value[0].name]: combination.option1,
+          [variations.value[1].name]: combination.option2,
+        },
+        price: combinationPrices.value[index],
+        stock: combinationQuantities.value[index],
+      })
+    );
+    props.productData.variationList = tempVariationList;
+    console.log(props.productData);
+  }
+}
+
 watch(
   variations,
   () => {
@@ -324,15 +337,11 @@ watch(
       singleVariationQuantities.value = Array(
         variations.value[0].options.length
       ).fill(1);
-      singleVariationVisibility.value = Array(
-        variations.value[0].options.length
-      ).fill(true);
     } else if (variations.value.length === 2) {
       const totalCombinations =
         variations.value[0].options.length * variations.value[1].options.length;
       combinationPrices.value = Array(totalCombinations).fill("");
       combinationQuantities.value = Array(totalCombinations).fill(1);
-      combinationVisibility.value = Array(totalCombinations).fill(true);
     }
   },
   { deep: true }
@@ -341,6 +350,10 @@ watch(
 const toggleVariations = () => {
   if (!hasVariations.value) {
     variations.value = [];
+  }
+  if (hasVariations.value) {
+    props.productData.basePrice = 0;
+    props.productData.baseQuantity = 0;
   }
 };
 

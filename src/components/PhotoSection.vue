@@ -2,7 +2,7 @@
   <div class="photos-section">
     <h2 class="section-title">Hình ảnh và video</h2>
     <p class="section-description">
-      Thêm tối đa 10 hình ảnh và 1 video cho sản phẩm của bạn
+      Thêm tối đa 9 hình ảnh và 1 video cho sản phẩm của bạn
     </p>
 
     <div class="photo-grid">
@@ -10,18 +10,28 @@
         v-for="(photo, index) in previewPhotoList"
         :key="index"
         class="photo-item"
-        :class="{ 'is-empty': !photo }"
       >
         <template v-if="photo">
           <img :src="photo" :alt="`Product photo ${index + 1}`" />
-          <button class="delete-btn" @click="removePhoto(index)">
-            <span class="icon">🗑️</span>
-          </button>
+          <button class="delete-btn" @click="removePhoto(index)">🗑️</button>
         </template>
         <div v-else class="upload-placeholder" @click="triggerFileInput">
           <q-icon size="40px" name="image" />
-          <span>Add a photo</span>
+          <span>Thêm ảnh</span>
         </div>
+      </div>
+
+      <div class="video-item" v-if="videoUrlBeforeUpload">
+        <q-video :src="videoUrlBeforeUpload" />
+        <button class="delete-btn" @click="removeVideo">🗑️</button>
+      </div>
+      <div
+        v-else
+        class="upload-placeholder video-placeholder"
+        @click="triggerVideoInput"
+      >
+        <q-icon size="40px" name="videocam" />
+        <span>Thêm video</span>
       </div>
     </div>
 
@@ -33,39 +43,114 @@
       class="hidden"
       @change="handleFileUpload"
     />
-    <button @click="test">test</button>
+    <input
+      ref="videoInput"
+      type="file"
+      accept="video/*"
+      class="hidden"
+      @change="handleVideoUpload"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
+import { ref, onMounted } from "vue";
 import cloudinaryService from "../services/cloudinary.service";
 
 const props = defineProps({ productData: Object });
+defineExpose({ uploadAllFile });
 
-const previewPhotoList = ref(Array(10).fill(null));
+const ffmpeg = new FFmpeg();
+const videoUrlBeforeUpload = ref(props.productData.videoUrl || null);
+const previewPhotoList = ref([
+  ...props.productData.imageList,
+  ...Array(9 - props.productData.imageList.length).fill(null),
+]);
+const imgListToUpload = ref([]);
+const videoToUpload = ref(null);
 const fileInput = ref(null);
-const fileListToUpload = ref([]);
+const videoInput = ref(null);
 
-const triggerFileInput = () => {
-  fileInput.value.click();
-};
+const triggerFileInput = () => fileInput.value.click();
+const triggerVideoInput = () => videoInput.value.click();
+
+async function loadFFmpeg() {
+  if (!ffmpeg.loaded) await ffmpeg.load();
+}
+
+async function compressVideo(file) {
+  await loadFFmpeg();
+  ffmpeg.writeFile("input.mp4", await fetchFile(file));
+  await ffmpeg.exec([
+    "-i",
+    "input.mp4",
+    "-b:v",
+    "500k",
+    "-vf",
+    "scale=854:480",
+    "-preset",
+    "ultrafast",
+    "-c:v",
+    "libx264",
+    "-an",
+    "output.mp4",
+  ]);
+  const data = await ffmpeg.readFile("output.mp4");
+  return new File([data], "compressed.mp4", { type: "video/mp4" });
+}
+
+async function uploadAllFile() {
+  await uploadVideo();
+  await uploadImage();
+}
+
+async function uploadVideo() {
+  if (!videoToUpload.value) return;
+  try {
+    const compressedFile = await compressVideo(videoToUpload.value);
+    props.productData.videoUrl = await cloudinaryService.uploadVideo(
+      compressedFile
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function uploadImage() {
+  if (imgListToUpload.value.length === 0) return;
+  try {
+    for (const file of imgListToUpload.value) {
+      const imgUrl = await cloudinaryService.uploadImage(file);
+      props.productData.imageList.push(imgUrl);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function handleVideoUpload(event) {
+  try {
+    const file = event.target.files[0];
+    videoToUpload.value = file;
+    videoUrlBeforeUpload.value = URL.createObjectURL(file);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 const handleFileUpload = (event) => {
   const files = Array.from(event.target.files);
-
-  files.forEach((file, index) => {
-    if (fileListToUpload.value.length < 10) {
-      fileListToUpload.value.push(file);
-
+  files.forEach((file) => {
+    if (imgListToUpload.value.length < 9) {
+      imgListToUpload.value.push(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        const firstEmptyIndex = previewPhotoList.value.findIndex(
+        const index = previewPhotoList.value.findIndex(
           (photo) => photo === null
         );
-        if (firstEmptyIndex !== -1) {
-          previewPhotoList.value[firstEmptyIndex] = e.target.result;
-        }
+        if (index !== -1) previewPhotoList.value[index] = e.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -74,26 +159,12 @@ const handleFileUpload = (event) => {
 
 const removePhoto = (index) => {
   previewPhotoList.value[index] = null;
-  fileListToUpload.value.splice(index, 1);
+  imgListToUpload.value.splice(index, 1);
 };
 
-async function test() {
-  await uploadImage();
-}
-async function uploadImage() {
-  if (fileListToUpload.value.length === 0) {
-    console.log("ko có ảnh");
-    return;
-  }
-  try {
-    for (const file of fileListToUpload.value) {
-      const imgUrl = await cloudinaryService.uploadImage(file);
-      props.productData.imageList.push(imgUrl);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
+const removeVideo = () => {
+  videoUrlBeforeUpload.value = "";
+};
 </script>
 
 <style scoped>
@@ -118,7 +189,8 @@ async function uploadImage() {
   gap: 1rem;
 }
 
-.photo-item {
+.photo-item,
+.video-item {
   aspect-ratio: 1;
   border: 2px dashed #e1e1e1;
   border-radius: 8px;
@@ -126,7 +198,8 @@ async function uploadImage() {
   overflow: hidden;
 }
 
-.photo-item img {
+.photo-item img,
+.video-item video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -142,9 +215,8 @@ async function uploadImage() {
   color: #595959;
 }
 
-.upload-placeholder i {
-  font-size: 24px;
-  margin-bottom: 0.5rem;
+.video-placeholder {
+  border: 2px dashed #007aff;
 }
 
 .delete-btn {

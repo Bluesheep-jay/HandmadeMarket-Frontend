@@ -6,6 +6,7 @@
       Hãy đăng bán sản phẩm đầu tiên để khởi đầu hành trình bán hàng cùng HMM
       nào
     </div>
+    <button class="btn" to="/shop">Bắt đầu xây dựng cửa hàng nào</button>
   </div>
 </template>
 
@@ -37,6 +38,22 @@ defineEmits(["back", "submit"]);
     font-size: 17px;
     color: rgb(50, 50, 50);
     text-align: center;
+  }
+  .btn {
+    margin-top: 15px;
+    background: none;
+    border: none;
+    border-radius: 5px;
+    border: 2px solid var(--btn);
+    background: var(--btn);
+    color: white;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  }
+  .btn:hover {
+    cursor: pointer;
   }
 }
 </style>

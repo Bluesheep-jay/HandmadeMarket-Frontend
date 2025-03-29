@@ -10,7 +10,7 @@
         <div class="input-with-unit">
           <input
             id="weight"
-            v-model="weight"
+            v-model="productData.weight"
             type="number"
             min="0"
             step="0.1"
@@ -26,7 +26,7 @@
         <div class="dimensions-group">
           <div class="input-with-unit">
             <input
-              v-model="length"
+              v-model="productData.length"
               type="number"
               min="0"
               step="0.1"
@@ -37,7 +37,7 @@
           </div>
           <div class="input-with-unit">
             <input
-              v-model="width"
+              v-model="productData.width"
               type="number"
               min="0"
               step="0.1"
@@ -48,7 +48,7 @@
           </div>
           <div class="input-with-unit">
             <input
-              v-model="height"
+              v-model="productData.height"
               type="number"
               min="0"
               step="0.1"
@@ -92,10 +92,8 @@
   <script setup>
   import { ref } from 'vue'
   
-  const weight = ref('')
-  const length = ref('')
-  const width = ref('')
-  const height = ref('')
+  const props = defineProps({productData: Object})
+
   const fastShipping = ref(false)
   const heavyShipping = ref(false)
   </script>

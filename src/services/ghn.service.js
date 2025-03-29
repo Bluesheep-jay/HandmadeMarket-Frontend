@@ -38,5 +38,39 @@ class GiaoHangNhanhService {
     ).data;
     return res;
   }
+
+  async getService(data) {
+    const res = (
+      await axios.post(
+        `https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Token: this.GHN_TOKEN,
+          },
+        }
+      )
+    ).data;
+    return res;
+  }
+
+  async calculateFee(requestData) {
+    const res = (
+      await axios.post(
+        "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee",
+        requestData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Token: this.GHN_TOKEN,
+            ShopId: 5648020,
+          },
+        }
+      )
+    ).data;
+
+    return res;
+  }
 }
 export default new GiaoHangNhanhService();

@@ -22,7 +22,7 @@
             <button class="add-btn" @click="showAddressDialog = true">
               Thêm
             </button>
-            <div v-if="formData.wardId" class="pickup-address-display q-mt-sm">
+            <div v-if="addressForm.specificAddress" class="pickup-address-display q-mt-sm">
               <div class="">{{ addressForm.fullName }},</div>
               <div>{{ addressForm.province.label }},</div>
               <div>{{ addressForm.district.label }},</div>
@@ -75,10 +75,11 @@
         class="btn-save"
         @click="$emit('next')"
         label="Tiếp tục"
-        :disable="!isFormValid"
+        
       />
     </div>
-
+    <!-- :disable="!isFormValid" -->
+     
     <q-dialog v-model="showAddressDialog">
       <q-card style="width: 700px; max-width: 80vw">
         <q-card-section>
@@ -192,14 +193,12 @@ async function fetchDistricts(province) {
 
 const fetchWards = async (district) => {
   const data = await ghnService.getWard(district.value);
-
   wards.value = data.data.map((ward) => ({
     label: ward.WardName,
     value: ward.WardCode,
   }));
 };
 
-//  **Watch để reset ward khi province thay đổi**
 watch(
   () => addressForm.value.province,
   (newProvince) => {
@@ -213,7 +212,6 @@ watch(
   }
 );
 
-//  **Watch để reset ward khi district thay đổi**
 watch(
   () => addressForm.value.district,
   (newDistrict) => {
@@ -230,7 +228,13 @@ const saveAddress = () => {
   props.formData.provinceId = addressForm.value.province.value;
   props.formData.districtId = addressForm.value.district.value;
   props.formData.wardId = addressForm.value.ward.value;
+  props.formData.provinceName = addressForm.value.province.label;
+  props.formData.districtName = addressForm.value.district.label;
+  props.formData.wardName = addressForm.value.ward.label;
   props.formData.specificAddress = addressForm.value.specificAddress;
+
+  console.log(props.formData)
+
 };
 
 const isValidEmail = (email) => {

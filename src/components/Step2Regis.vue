@@ -165,12 +165,15 @@
 
 <script setup>
 import { defineProps, defineEmits, computed, ref } from "vue";
-
+import { useQuasar } from "quasar";
 import shopService from "../services/shop.service";
 import cloudinaryService from "../services/cloudinary.service";
+import { useNotification } from "@kyvg/vue3-notification";
 
+const $q = useQuasar();
 const props = defineProps(["formData"]);
 const emit = defineEmits(["next", "back"]);
+const loadingNotification = ref(null);
 
 const idFrontImagePreview = ref(null);
 const idBackImagePreview = ref(null);
@@ -195,16 +198,24 @@ const handleImageUpload = (type) => {
 
 async function handleSaveAndNext() {
   try {
-    emit("next");
+    $q.loading.show({
+      message: "Đang tạo cửa hàng, vui lòng đợi...",
+      spinnerSize: 50,
+    });
     const frontImgUrl = await cloudinaryService.uploadImage(
       props.formData.idFrontImageUrl
     );
+
     const backImgeUrl = await cloudinaryService.uploadImage(
       props.formData.idBackImageUrl
     );
+    emit("next");
+
     props.formData.idFrontImageUrl = frontImgUrl;
     props.formData.idBackImageUrl = backImgeUrl;
     const res = await shopService.createShop(props.formData);
+    console.log("done");
+    $q.loading.hide();
   } catch (error) {
     console.log(error);
   }
