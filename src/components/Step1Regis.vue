@@ -22,7 +22,10 @@
             <button class="add-btn" @click="showAddressDialog = true">
               Thêm
             </button>
-            <div v-if="addressForm.specificAddress" class="pickup-address-display q-mt-sm">
+            <div
+              v-if="addressForm.specificAddress"
+              class="pickup-address-display q-mt-sm"
+            >
               <div class="">{{ addressForm.fullName }},</div>
               <div>{{ addressForm.province.label }},</div>
               <div>{{ addressForm.district.label }},</div>
@@ -51,23 +54,6 @@
           />
         </div>
       </div>
-      <div class="field-container-all">
-        <div class="label-all">Email</div>
-        <div class="input-container-all">
-          <q-input
-            class="input-all"
-            dense
-            outlined
-            v-model="formData.email"
-            label="Email *"
-            :rules="[
-              (val) => !!val || 'Email không để trống',
-              (val) => isValidEmail(val) || 'Sai định dạng email',
-            ]"
-            type="email"
-          />
-        </div>
-      </div>
     </div>
 
     <div class="btn-save-container q-mt-lg">
@@ -75,11 +61,12 @@
         class="btn-save"
         @click="$emit('next')"
         label="Tiếp tục"
-        
       />
+        <!-- :disable="!isFormValid" -->
+
     </div>
-    <!-- :disable="!isFormValid" -->
-     
+
+
     <q-dialog v-model="showAddressDialog">
       <q-card style="width: 700px; max-width: 80vw">
         <q-card-section>
@@ -233,22 +220,11 @@ const saveAddress = () => {
   props.formData.wardName = addressForm.value.ward.label;
   props.formData.specificAddress = addressForm.value.specificAddress;
 
-  console.log(props.formData)
-
-};
-
-const isValidEmail = (email) => {
-  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-  return emailPattern.test(email);
+  console.log(props.formData);
 };
 
 const isFormValid = computed(() => {
-  return (
-    props.formData.shopName &&
-    props.formData.phoneNumber &&
-    props.formData.email &&
-    isValidEmail(props.formData.email)
-  );
+  return props.formData.shopName && props.formData.phoneNumber;
 });
 </script>
 

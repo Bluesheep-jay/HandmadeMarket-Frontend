@@ -60,8 +60,7 @@ const router = createRouter({
         },
         {
           path: "shop-detail/:id",
-          component: () =>
-            import("../Views/customer/ShopDetail.vue"),
+          component: () => import("../Views/customer/ShopDetail.vue"),
           meta: { requiresAuth: true },
         },
         {
@@ -133,12 +132,22 @@ const router = createRouter({
             },
           ],
         },
+        {
+          path: "voucher-management",
+          name: "voucher-management",
+          component: () => import("../Views/shop/VoucherManagement.vue"),
+        },
       ],
     },
 
     {
       path: "/admin",
-      component: () => import("../Views/Admin/AdminDashBoard.vue"),
+      component: () => import("../Views/Admin/AdminHomePage.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/admin/test",
+      component: () => import("../Views/Admin/pattern.vue"),
     },
   ],
 });

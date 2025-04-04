@@ -152,14 +152,31 @@
           label="Quay lại"
           class="q-mr-sm"
         />
-        <q-btn
-          class="next-btn"
-          @click="handleSaveAndNext"
-          label="Tiếp tục"
-          :disable="!isFormValid"
-        />
+        <q-btn class="next-btn" @click="handleSaveAndNext" label="Tiếp tục" />
       </div>
+      <!-- :disable="!isFormValid" -->
     </div>
+
+    <!-- dialog confirm email otp -->
+
+    <q-dialog v-model="otpDialog" persistent>
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Xác thực Email</div>
+          <div>Vui lòng nhập mã OTP đã gửi đến email của bạn:</div>
+          <q-input v-model="otpCode" label="Mã OTP" outlined dense />
+        </q-card-section>
+        <q-card-actions>
+          <q-btn label="Xác nhận" @click="confirmOtp" color="primary" />
+          <q-btn
+            label="Hủy"
+            @click="otpDialog = false"
+            color="secondary"
+            flat
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -169,7 +186,10 @@ import { useQuasar } from "quasar";
 import shopService from "../services/shop.service";
 import cloudinaryService from "../services/cloudinary.service";
 import { useNotification } from "@kyvg/vue3-notification";
+import emailService from "../services/email.service";
 
+const { notify } = useNotification();
+const userEmail = ref(localStorage.getItem("userEmail"));
 const $q = useQuasar();
 const props = defineProps(["formData"]);
 const emit = defineEmits(["next", "back"]);
@@ -177,6 +197,8 @@ const loadingNotification = ref(null);
 
 const idFrontImagePreview = ref(null);
 const idBackImagePreview = ref(null);
+const otpDialog = ref(false);
+const otpCode = ref("");
 
 const handleImageUpload = (type) => {
   const file =
@@ -199,27 +221,66 @@ const handleImageUpload = (type) => {
 async function handleSaveAndNext() {
   try {
     $q.loading.show({
-      message: "Đang tạo cửa hàng, vui lòng đợi...",
+      message: "Đang chờ xác thực, vui lòng đợi...",
       spinnerSize: 50,
     });
-    const frontImgUrl = await cloudinaryService.uploadImage(
-      props.formData.idFrontImageUrl
-    );
 
-    const backImgeUrl = await cloudinaryService.uploadImage(
-      props.formData.idBackImageUrl
-    );
-    emit("next");
+    const [frontImageUrl, backImageUrl] = await Promise.all([
+      cloudinaryService.uploadImage(props.formData.idFrontImageUrl),
+      cloudinaryService.uploadImage(props.formData.idBackImageUrl),
+    ]);
+    console.log("run1");
+    props.formData.idFrontImageUrl = frontImageUrl;
+    props.formData.idBackImageUrl = backImageUrl;
 
-    props.formData.idFrontImageUrl = frontImgUrl;
-    props.formData.idBackImageUrl = backImgeUrl;
-    const res = await shopService.createShop(props.formData);
-    console.log("done");
+    const res = await emailService.sendEmail(userEmail.value);
+    if (res.status === 200) {
+      otpDialog.value = true;
+    } else {
+      notify({
+        type: "error",
+        title: "Lỗi",
+        text: "Gửi mã OTP không thành công. Vui lòng thử lại.",
+      });
+    }
     $q.loading.hide();
   } catch (error) {
     console.log(error);
   }
 }
+
+const confirmOtp = async () => {
+  try {
+    const res = await emailService.verifyEmail(userEmail.value, otpCode.value);
+    if (res.status === 200) {
+      otpDialog.value = false;
+      createShop();
+    } else {
+      $q.notify({
+        type: "negative",
+        message: "Mã OTP không hợp lệ. Vui lòng thử lại.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const createShop = async () => {
+  try {
+    loadingNotification.value = $q.loading.show({
+      message: "Đang tạo cửa hàng, vui lòng đợi...",
+      spinnerSize: 50,
+    });
+
+    const res = await shopService.createShop(props.formData);
+    emit("next");
+
+    $q.loading.hide();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const isFormValid = computed(() => {
   return (

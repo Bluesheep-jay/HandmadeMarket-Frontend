@@ -121,10 +121,17 @@ async function uploadVideo() {
 async function uploadImage() {
   if (imgListToUpload.value.length === 0) return;
   try {
-    for (const file of imgListToUpload.value) {
-      const imgUrl = await cloudinaryService.uploadImage(file);
-      props.productData.imageList.push(imgUrl);
-    }
+    // for (const file of imgListToUpload.value) {
+    //   const imgUrl = await cloudinaryService.uploadImage(file);
+    //   props.productData.imageList.push(imgUrl);
+    // }
+
+    const uploadPromises = imgListToUpload.value.map((file) =>
+      cloudinaryService.uploadImage(file)
+    );
+
+    const uploadedUrls = await Promise.all(uploadPromises);
+    props.productData.imageList.push(...uploadedUrls);
   } catch (error) {
     console.log(error);
   }

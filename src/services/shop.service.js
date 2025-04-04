@@ -14,8 +14,35 @@ class ShopService {
     const res = (await api.get(`${this.path}/${id}`)).data;
     return res;
   }
+  // async createShop(shop, idFrontImage, idBackImage) {
+  //   const formData = new FormData();
+  //   formData.append("idFrontImage", idFrontImage);
+  //   formData.append("idBackImage", idBackImage);
+  //   formData.append("shop", JSON.stringify(shop));
+
+  //   const res = await api.post(this.path, formData, {
+  //     headers: { "Content-Type": "multipart/form-data" },
+  //   });
+
+  //   return res.data;
+  // }
+
   async createShop(shop) {
-    const res = (await api.post(`${this.path}`, shop)).data;
+    const res = (await api.post(this.path, shop)).data;
+    return res;
+  }
+
+  async uploadImage(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = (
+      await api.post(`${this.path}/image`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+    ).data;
     return res;
   }
 
@@ -30,7 +57,9 @@ class ShopService {
   }
 
   async getProductsByShopId(shopId) {
-    const res = (await api.get(`${this.path}/product-list/by-shop-id/${shopId}`)).data;
+    const res = (
+      await api.get(`${this.path}/product-list/by-shop-id/${shopId}`)
+    ).data;
     return res;
   }
 }

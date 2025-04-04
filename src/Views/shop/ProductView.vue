@@ -328,6 +328,7 @@ onBeforeMount(async () => {
   loading.value = true;
   try {
     productList.value = await shopService.getProductsByShopId(shopId.value);
+    console.log(productList.value);
   } catch (error) {
     console.error(error);
     $q.notify({

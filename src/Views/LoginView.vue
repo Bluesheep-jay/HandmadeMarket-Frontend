@@ -61,6 +61,7 @@ import { useRouter } from "vue-router";
 
 import registerService from "../services/authentication.service";
 import { useAuthStore } from "../stores/auth";
+import usersService from "../services/users.service";
 
 const { notify } = useNotification();
 const router = useRouter();
@@ -89,7 +90,17 @@ const onSubmit = async () => {
 
       if (token) {
         authStore.setToken(token);
+        const user = await usersService.getUserByEmail(email.value); // Ensure this is awaited
+        authStore.setUser(user);
+        authStore.setRole(user.enumRole);
+        authStore.setUserId(user.id);
+
+        if (user.enumRole === "ADMIN") {
+          router.push("/admin");
+          return;
+        }
       }
+
       notify({
         title: "Success",
         text: "Đăng nhập thành công!",

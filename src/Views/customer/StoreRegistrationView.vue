@@ -38,7 +38,6 @@ const userEmail = ref(localStorage.getItem("userEmail"));
 const userInfo = ref(null);
 const formData = ref({
   shopName: "",
-  shopDescription: "",
   fullName: "",
   provinceId: "",
   districtId: "",
@@ -48,7 +47,6 @@ const formData = ref({
   wardName: "",
   specificAddress: "",
   phoneNumber: "",
-  email: "",
 });
 
 onBeforeMount(async () => {
@@ -67,24 +65,6 @@ const nextStep = () => {
   step.value++;
 };
 
-const submitForm = async () => {
-  try {
-    // Here you would typically make an API call to submit the form data
-    console.log("Form Data:", formData.value);
-
-    $q.notify({
-      type: "positive",
-      message: "Store registration successful!",
-    });
-
-    // Reset form or redirect to dashboard
-  } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Failed to register store. Please try again.",
-    });
-  }
-};
 </script>
 
 <style scoped>

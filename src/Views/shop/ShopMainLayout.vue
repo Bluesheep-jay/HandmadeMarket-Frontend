@@ -110,14 +110,11 @@
           label="Kênh Marketing"
         >
           <q-list class="q-pl-lg">
+            <q-item clickable v-ripple to="/shop/voucher-management">
+              <q-item-section>Mã giảm giá</q-item-section>
+            </q-item>
             <q-item clickable v-ripple>
               <q-item-section>Kênh Marketing</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section>Đấu Giá Rẻ Vô Địch</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section>Quảng Cáo Shopee</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>

@@ -136,6 +136,7 @@
               </q-card>
             </div>
           </div>
+          <div></div>
         </div>
       </div>
 
@@ -261,16 +262,23 @@
             >
               <q-card>
                 <q-card-section>
-                  <q-input
-                    v-model="couponCode"
-                    label="Enter code"
-                    outlined
-                    dense
-                  >
-                    <template v-slot:append>
-                      <q-btn color="primary" label="Apply" flat />
-                    </template>
-                  </q-input>
+                  <q-item v-for="(voucher, index) in voucherList" :key="index">
+                    <div class="address-container">
+                      <q-radio
+                        @click="addVoucherToOrder(voucher)"
+                        :class="{
+                          'selected-radio':
+                            selectedPlatformVoucherId === voucher.id,
+                        }"
+                        class="address-1"
+                        v-model="selectedPlatformVoucherId"
+                        :val="voucher.id"
+                        checked-icon="task_alt"
+                        unchecked-icon="panorama_fish_eye"
+                        :label="voucher.code"
+                      />
+                    </div>
+                  </q-item>
                 </q-card-section>
               </q-card>
             </q-expansion-item>
@@ -356,6 +364,7 @@ import addressService from "../../services/address.service";
 import paymentMethodService from "../../services/paymentMethod.service";
 import vnpayService from "../../services/vnpay.service";
 import orderService from "../../services/order.service";
+import voucherService from "../../services/voucher.service";
 
 const PROCESSING_STATUS = "67ca8c309504452e420327c0";
 const VNPAY_METHOD = "67ca83dce899cd4bd9882dfd";
@@ -371,6 +380,8 @@ const provinces = ref([]);
 const districts = ref([]);
 const wards = ref([]);
 const groupedCartList = ref([]);
+const voucherList = ref([]);
+const selectedPlatformVoucherId = ref(null);
 
 const selectedAddress = ref(null);
 const selectedPayment = ref(null);
@@ -415,16 +426,21 @@ onBeforeMount(async () => {
   userData.value = await usersService.getUserByEmail(userEmail);
   cartData.value = await cartService.getById(userData.value.cartId);
   paymentMethodList.value = await paymentMethodService.getAll();
-  console.log(cartData.value);
-  groupCartItemsByShop();
-
+  voucherList.value = await voucherService.getVouchersByPlatform();
+  await groupCartItemsByShop();
   console.log(groupedCartList.value);
+
   cartItemList.value = cartData.value.cartItems;
 
   fetchUserAddress();
   fetchProvinces();
 });
 
+
+
+const addVoucherToOrder = (voucher) => {
+  discount.value = voucher.discountValue;
+};
 const removeAddress = async (addressId) => {
   try {
     await addressService.delete(addressId);
@@ -485,7 +501,7 @@ function changeShopTotalPrice(shopIndex) {
     return total + item.subPrice * item.quantity;
   }, 0);
 }
-function groupCartItemsByShop() {
+ function groupCartItemsByShop() {
   groupedCartList.value = Object.values(
     cartData.value.cartItems.reduce((acc, item) => {
       const shopId = item.shopId;
@@ -506,14 +522,13 @@ function groupCartItemsByShop() {
       }
 
       acc[shopId].shopTotalPrice += item.subPrice * item.quantity;
-
       acc[shopId].items.push(item);
       return acc;
     }, {})
   );
 }
 
-//// ===== Thanh toán =====================//
+
 const saveAddress = async () => {
   try {
     addressForm.value.provinceId = selectedProvince.value.value;
@@ -571,7 +586,8 @@ const orderSummary = computed(() => {
     (sum, item) => sum + (item.subPrice * item.quantity || 0),
     0
   );
-  totalAmount.value = itemsTotal + totalShippingFee.value;
+
+  totalAmount.value = itemsTotal + totalShippingFee.value - discount.value;
 
   return { itemsTotal };
 });
