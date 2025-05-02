@@ -75,15 +75,26 @@
             </div>
           </q-img>
 
+          <!-- Pending Status -->
+          <div
+            v-if="product.productStatusId === pendingStatus"
+            class="pending-status text-caption text-center text-white bg-orange q-pa-xs"
+          >
+            Đang chờ duyệt
+          </div>
+
           <q-card-section>
             <div class="text-h6 ellipsis-2-lines">
               {{ product.productTitle }}
             </div>
             <div class="row items-center q-mt-xs">
               <q-icon name="inventory" size="xs" class="q-mr-xs" />
-              <span class="text-caption"
-                >Tồn kho: {{ getTotalStock(product.variationList) }}</span
-              >
+              <span class="text-caption" v-if="product.variationList.length === 0">
+                Tồn kho: {{ product.baseQuantity }}
+              </span>
+              <span class="text-caption" v-else>
+                Tồn kho: {{ getTotalStock(product.variationList) }}
+              </span>
             </div>
           </q-card-section>
 
@@ -96,9 +107,7 @@
           <q-card-section class="q-pt-none">
             <div class="row q-gutter-xs flex-wrap">
               <q-chip
-                v-for="(variation, index) in getVariationTypes(
-                  product.variationList
-                )"
+                v-for="(variation, index) in getVariationTypes(product.variationList)"
                 :key="index"
                 size="sm"
                 color="primary"
@@ -112,12 +121,14 @@
 
           <q-separator />
 
+          <!-- Card Actions -->
           <q-card-actions align="right">
             <q-btn
               flat
               color="primary"
               icon="edit"
               label="Chỉnh sửa"
+              v-if="product.productStatusId !== pendingStatus"
               @click="openEditModal(product)"
             />
             <q-btn
@@ -184,6 +195,7 @@ const editedProduct = ref({});
 const shopId = ref(localStorage.getItem("shopId"));
 const currentPage = ref(1);
 const itemsPerPage = ref(8);
+const pendingStatus = ref("68064eef2622c0e13e3d6f06")
 
 // Computed
 const filteredProducts = computed(() => {
@@ -373,5 +385,16 @@ onBeforeMount(async () => {
 
 .bg-opacity-60 {
   opacity: 0.8;
+}
+
+.pending-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: orange;
+  color: white;
+  font-weight: bold;
+  z-index: 10;
 }
 </style>

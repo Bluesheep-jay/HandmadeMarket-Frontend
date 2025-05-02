@@ -8,6 +8,10 @@ class TransactionService {
   async getAllByShopId(shopId) {
     return (await api.get(`${this.path}/shop/${shopId}`)).data;
   }
+
+  async getAll() {
+    return (await api.get(this.path)).data;
+  }
 }
 
 export default new TransactionService();

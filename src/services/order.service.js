@@ -9,6 +9,14 @@ class OrderService {
     const res = await api.get(`${this.path}`);
     return res.data;
   }
+  
+  async getTotal() {
+    const res = await api.get(`${this.path}/total`);
+    return res.data;
+  }
+  async getAllOrdersWithDetail() {
+    return (await api.get(`${this.path}/with-detail`)).data;
+  }
 
   async getAllOrderWithProductByUserId(userId) {
     const res = await api.get(`${this.path}/with-products/customer/${userId}`);

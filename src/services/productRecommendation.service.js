@@ -27,6 +27,18 @@ class productRecommendationService {
     }
   }
 
+  async seachProduct(keyword) {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/search?keyword=${keyword}`
+      );
+      return response.data
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error);
+      throw error;
+    }
+  }
+
   
 }
 

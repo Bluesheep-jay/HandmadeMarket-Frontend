@@ -124,7 +124,55 @@
     <!-- Main Content -->
     <q-page-container>
       <router-view />
+      <q-btn icon="chat" class="chat-btn" @click="openChatListDialog" />
     </q-page-container>
+
+    <q-dialog v-model="chatListDialog">
+      <q-card style="min-width: 400px; max-width: 600px">
+        <q-card-section>
+          <div class="text-h6">Danh sách người đã nhắn tin</div>
+        </q-card-section>
+        <q-card-section>
+          <q-list>
+            <q-item
+              v-for="partner in chatPartners"
+              :key="partner.id"
+              clickable
+              @click="openChatWith(partner)"
+            >
+              <q-item-section avatar>
+                <q-avatar>
+                  <img
+                    :src="partner.avatarUrl || 'https://cdn.quasar.dev/img/avatar.png'"
+                    alt="Avatar"
+                  />
+                </q-avatar>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ partner.username }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Đóng" color="negative" @click="closeChatDialog" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    
+    <q-dialog v-model="chatDialog">
+      <q-card style="min-width: 400px; max-width: 600px">
+        <q-card-section>
+          <div class="text-h6">Trò chuyện với người bán</div>
+        </q-card-section>
+        <q-card-section>
+          <ChatComponent :receiver-id="selectedPartnerId" :currentUserId="shopId" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Đóng" color="negative" @click="closeChatDialog" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
@@ -132,18 +180,22 @@
 import { onBeforeMount, ref } from "vue";
 
 import shopService from "../../services/shop.service";
+import ChatComponent from "../../components/ChatComponent.vue";
+import chatService from "../../services/chat.service";
 
 const leftDrawerOpen = ref(true);
-
+const chatDialog = ref(false);
+const chatListDialog = ref(false);
+const chatPartners = ref([]);
 const shopId = localStorage.getItem("shopId");
 const shopInfo = ref(null);
+const drawer = ref(false);
+const miniState = ref(null);
+const selectedPartnerId = ref("")
 
 onBeforeMount(async () => {
   shopInfo.value = await shopService.getById(shopId);
 });
-
-const drawer = ref(false);
-const miniState = ref(null);
 function drawerClick(e) {
   if (miniState.value) {
     miniState.value = false;
@@ -154,9 +206,41 @@ function drawerClick(e) {
 function collapseHandler() {
   miniState.value = true;
 }
+
+const openChatListDialog = async () => {
+  chatListDialog.value = true;
+  try {
+    chatPartners.value = await chatService.getChatPartners(shopId);
+    console.log(chatPartners.value);
+  } catch (error) {
+    console.error("Error fetching chat partners:", error);
+  }
+};
+
+const openChatWith = (partner) => {
+  selectedPartnerId.value = partner.id;
+  chatDialog.value = true;
+};
+const closeChatDialog = () => {
+  chatDialog.value = false;
+};
 </script>
 
 <style scoped>
+.chat-btn {
+  background: var(--icon);
+  color: white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Thêm hiệu ứng đổ bóng */
+}
 .logo-container {
   display: flex;
   justify-content: center;

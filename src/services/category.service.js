@@ -5,6 +5,14 @@ class CategoryService {
     this.path = "categories";
   }
 
+  async getTop5(month, year){
+    const res = (await api.get(`${this.path}/top5/${month}/${year}`)).data
+    return res
+  }
+  async getAll() {
+    const res = (await api.get(`${this.path}`)).data;
+    return res;
+  }
   async getRootCategory(){
     const res = (await api.get(`${this.path}/roots`)).data
     return res
@@ -21,9 +29,9 @@ class CategoryService {
     return res
   }
 
-  async create() {
-    const res = (await api.get(`${this.path}`)).data;
-    return data;
+  async create(categoryForm) {
+    const res = (await api.post(`${this.path}`, categoryForm)).data;
+    return res;
   }
 }
 

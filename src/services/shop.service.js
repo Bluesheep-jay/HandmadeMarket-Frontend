@@ -14,6 +14,12 @@ class ShopService {
     const res = (await api.get(`${this.path}/${id}`)).data;
     return res;
   }
+
+  async getTotal() {
+    const res = (await api.get(`${this.path}/total`)).data;
+    return res;
+  }
+
   // async createShop(shop, idFrontImage, idBackImage) {
   //   const formData = new FormData();
   //   formData.append("idFrontImage", idFrontImage);

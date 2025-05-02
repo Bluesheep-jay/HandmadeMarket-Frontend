@@ -17,7 +17,6 @@ const router = createRouter({
           path: "",
           component: () => import("../Views/customer/HomePageView.vue"),
         },
-
         {
           path: "product-list/:id?",
           component: () => import("../Views/customer/ProductList.vue"),
@@ -29,6 +28,11 @@ const router = createRouter({
         {
           path: "cart",
           component: () => import("../Views/customer/CartView.vue"),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: "checkout",
+          component: () => import("../Views/customer/BuyNow.vue"),
           meta: { requiresAuth: true },
         },
         {
@@ -139,15 +143,48 @@ const router = createRouter({
         },
       ],
     },
-
     {
       path: "/admin",
-      component: () => import("../Views/Admin/AdminHomePage.vue"),
+      component: () => import("../Views/Admin/AdminDashboard.vue"),
       meta: { requiresAuth: true },
-    },
-    {
-      path: "/admin/test",
-      component: () => import("../Views/Admin/pattern.vue"),
+      children: [
+        {
+          path: "dashboard",
+          component: () => import("../Views/Admin/DashboardPage.vue"),
+        },
+        {
+          path: "users",
+          component: () => import("../Views/Admin/UserPage.vue"),
+        },
+        {
+          path: "products",
+          component: () => import("../Views/Admin/ProductPage.vue"),
+        },
+        {
+          path: "categories",
+          component: () => import("../Views/Admin/CategoryPage.vue"),
+        },
+        {
+          path: "orders",
+          component: () => import("../Views/Admin/OrderPage.vue"),
+        },
+        {
+          path: "shops",
+          component: () => import("../Views/Admin/ShopPage.vue"),
+        },
+        {
+          path: "transactions",
+          component: () => import("../Views/Admin/TransactionPage.vue"),
+        },
+        {
+          path: "commissions",
+          component: () => import("../Views/Admin/CommissionManager.vue"),
+        },
+        {
+          path: "vouchers",
+          component: () => import("../Views/Admin/VoucherPage.vue"),
+        },
+      ],
     },
   ],
 });

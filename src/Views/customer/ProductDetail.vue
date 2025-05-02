@@ -43,7 +43,7 @@
               :options="sortOptions"
               dense
               outlined
-              label="Sort by"
+              label="Lọc"
               style="width: 200px"
             />
           </div>
@@ -56,38 +56,56 @@
             >
               <!-- Star Rating -->
               <div class="stars-container">
-                <q-rating
-                  v-model="review.reviewRating"
-                  size="1.2em"
-                  color="black"
-                  readonly
-                />
-              </div>
-
-              <!-- Review Content -->
-              <div class="review-content">
-                <div class="review-text">{{ review.reviewComment }}</div>
-
                 <div class="reviewer-info">
                   <q-avatar size="24px" color="grey-3" text-color="primary">
                     <img :src="review.avatarUrl" />
                   </q-avatar>
-                  <span class="reviewer-name"> {{ review.username }}</span>
-                  <span class="review-date">{{
-                    formatDate(review.reviewCreatedDate)
-                  }}</span>
+                  <div class="reviewer-name">{{ review.username }}</div>
+                  <div class="review-date">
+                    {{ formatDate(review.reviewCreatedDate) }}
+                  </div>
                 </div>
+              </div>
 
-                <!-- Review Image if available -->
-                <div v-if="review.reviewImage" class="review-image-container">
-                  <img :src="review.reviewImage" class="review-image" />
+              <!-- Review Content -->
+              <div class="review-content">
+                <div class="review-text">
+                  <span v-if="!expandedReviews[review.id]">
+                    {{
+                      review.reviewComment.length > 80
+                        ? review.reviewComment.slice(0, 80) + "..."
+                        : review.reviewComment
+                    }}
+                    <q-btn
+                      flat
+                      dense
+                      color="primary"
+                      v-if="review.reviewComment.length > 80"
+                      @click="toggleReviewExpansion(review.id)"
+                      :label="
+                        expandedReviews[review.id] ? 'Thu gọn' : 'Xem thêm'
+                      "
+                    />
+                  </span>
+                  <span v-else>
+                    {{ review.reviewComment }}
+                  </span>
+                </div>
+                <!-- //* Review Image  review.reviewImage is List*/ -->
+                <div v-if="review.reviewImage && review.reviewImage.length > 0">
+                  <div
+                    v-for="(image, index) in review.reviewImage"
+                    :key="index"
+                  >
+                    <img class="review-img" :src="image" alt="Review Image" />
+                  </div>
                 </div>
               </div>
 
               <!-- Review Ratings -->
               <div class="review-ratings">
                 <div class="rating-item">
-                  <span class="rating-label">Item quality</span>
+                  <span class="rating-label">Chất lượng</span>
                   <div class="rating-stars">
                     <q-rating
                       :model-value="review.reviewRating"
@@ -117,7 +135,7 @@
 
       <!-- Product Details -->
       <div class="col-12 col-sm-5">
-        <div class="text-h4 q-mt-sm" v-if="!product.variationList">
+        <div class="text-h4 q-mt-sm" v-if="product.basePrice > 0">
           {{ formatPrice(product.basePrice) }}
         </div>
 
@@ -171,25 +189,32 @@
 
         <!-- Action Buttons -->
         <div class="q-mt-lg">
+          <!-- Nút Mua Ngay -->
           <q-btn
+            v-if="userId"
             color="primary"
             label="Mua ngay"
             class="full-width q-mb-sm"
             size="lg"
+            @click="buyItNow"
           />
           <q-btn
+            v-else
+            color="primary"
+            label="Đăng nhập để mua"
+            class="full-width q-mb-sm"
+            size="lg"
+            @click="redirectToLogin"
+          />
+
+          <!-- Nút Thêm vào giỏ hàng -->
+          <q-btn
+            v-if="userId"
             color="black"
             label="Thêm vào giỏ hàng"
             class="full-width"
             size="lg"
             @click="addToCart"
-          />
-          <q-btn
-            flat
-            color="primary"
-            label="Yêu thích"
-            class="full-width q-mt-sm"
-            icon="favorite_border"
           />
         </div>
 
@@ -236,10 +261,12 @@
 
                 <q-btn
                   rounded
+                  no-caps
                   outline
                   color="primary"
-                  label="Nhắn tin với người bán"
+                  label="Hỏi người bán"
                   class="q-mt-md"
+                  @click="openChatDialog"
                 />
               </q-card-section>
             </q-card>
@@ -250,9 +277,45 @@
       </div>
     </div>
 
+    <div class="product-list-container q-mt-xl q-px-md">
+      <div class="text-h6 q-mb-md">Xem thêm từ cửa hàng</div>
+      <div class="product-list">
+        <div
+          v-for="(item, index) in productFromThisShop"
+          :key="index"
+          class="product-item"
+          @click="navigateToProduct(item)"
+        >
+          <q-card class="cursor-pointer product-card">
+            <div class="image-container">
+              <q-img :src="item.imageList[0]" class="product-image" />
+              <q-btn
+                round
+                flat
+                dense
+                color="grey-7"
+                icon="favorite_border"
+                class="absolute-top-right favorite-btn"
+              />
+            </div>
+            <q-card-section class="q-pa-sm">
+              <div class="text-subtitle2 ellipsis-2-lines product-title">
+                {{ item.productTitle }}
+              </div>
+              <div class="shop-name text-grey-7">{{ item.shopName }}</div>
+              <div class="price-container">
+                <div class="current-price">
+                  {{ formatPrice(getNomalProductPrice(item)) }}
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+    </div>
     <!-- Similar Products Carousel -->
     <div class="q-mt-xl q-px-md">
-      <div class="text-h6 q-mb-md">Sản phẩm tương tự</div>
+      <div class="text-h6 q-mb-md">Bạn có thể thích</div>
       <div class="carousel-container">
         <q-btn
           round
@@ -295,7 +358,7 @@
 
     <!-- Diverse Products Carousel -->
     <div class="q-mt-xl q-px-md q-pb-xl">
-      <div class="text-h6 q-mb-md">Bạn có thể thích</div>
+      <div class="text-h6 q-mb-md">Khám phá mới</div>
       <div class="carousel-container">
         <q-btn
           round
@@ -335,6 +398,20 @@
         />
       </div>
     </div>
+
+    <q-dialog v-model="chatDialog">
+      <q-card style="min-width: 400px; max-width: 600px">
+        <q-card-section>
+          <div class="text-h6">Trò chuyện với người bán</div>
+        </q-card-section>
+        <q-card-section>
+          <ChatComponent :receiver-id="shopData?.id" :currentUserId="userId" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Đóng" color="negative" @click="closeChatDialog" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -347,15 +424,17 @@ import cartService from "../../services/cart.service";
 import { useNotification } from "@kyvg/vue3-notification";
 import productRecommendationService from "../../services/productRecommendation.service";
 import reviewService from "../../services/review.service";
+import ChatComponent from "../../components/ChatComponent.vue";
 
 const cartId = localStorage.getItem("cartId");
 const { notify } = useNotification();
+const userId = localStorage.getItem("userId");
 const route = useRoute();
 const router = useRouter();
 const productId = route.params.id;
 const product = ref(null);
 const shopData = ref(null);
-
+const chatDialog = ref(false);
 const personalText = ref("");
 const personalError = ref(false);
 const personalErrorMessage = ref("");
@@ -365,6 +444,7 @@ const attributeOptions = ref({});
 const selectedPrice = ref(null);
 const selectedImage = ref(0);
 
+const productFromThisShop = ref([]);
 const reviewsOfProduct = ref([]);
 const suggestedProductList = ref(null);
 const similarProducts = ref([]);
@@ -383,8 +463,27 @@ const cartItem = ref({
   personalizationRequired: false,
 });
 
-const sortReviewsBy = ref("Highest Rating");
-const sortOptions = ["Highest Rating", "Lowest Rating", "Newest", "Oldest"];
+const productBuyItNow = ref({
+  productId: "",
+  productTitle: "",
+  productImage: "",
+  quantity: 1,
+  shopId: "",
+  shopName: "",
+  shopAvatarUrl: "",
+  variationList: "",
+  selectedOptions: [],
+  subPrice: 1,
+  personalizationDescription: "",
+  personalizationOfClient: "",
+  personalizationRequired: false,
+  provinceId: "",
+  districtId: "",
+  wardId: "",
+});
+
+const sortReviewsBy = ref("Đánh giá tốt");
+const sortOptions = ["Đánh giá tốt", "Đánh giá xấu", "Mới nhất", "Cũ nhất"];
 const currentPage = ref(1);
 
 const itemsPerPage = 4;
@@ -393,14 +492,70 @@ const paginatedReviews = computed(() => {
   return reviewsOfProduct.value.slice(start, start + itemsPerPage);
 });
 
-const getInitials = (userId) => {
-  if (!userId) return "U";
-  return userId.substring(0, 2).toUpperCase();
+const expandedReviews = ref({});
+
+const toggleReviewExpansion = (reviewId) => {
+  expandedReviews.value[reviewId] = !expandedReviews.value[reviewId];
+};
+
+const openChatDialog = () => {
+  chatDialog.value = true;
+};
+const closeChatDialog = () => {
+  chatDialog.value = false;
+};
+
+const redirectToLogin = () => {
+  router.push("/login");
 };
 
 onBeforeMount(async () => {
   await fetchData();
 });
+
+async function buyItNow() {
+  try {
+    if (
+      product.value.personalizationDescription &&
+      !cartItem.value.personalizationOfClient.trim()
+    ) {
+      personalError.value = true;
+      personalErrorMessage.value = "Vui lòng nhập nội dung cá nhân hóa!";
+      return;
+    } else {
+      personalError.value = false;
+      personalErrorMessage.value = "";
+    }
+
+    productBuyItNow.value.productId = productId;
+    productBuyItNow.value.selectedOptions = selectedAttributes.value;
+    if (product.value.basePrice > 0) {
+      productBuyItNow.value.subPrice = product.value.basePrice;
+    } else {
+      productBuyItNow.value.subPrice = selectedPrice.value;
+    }
+
+    productBuyItNow.value.shopId = shopData.value.id;
+    productBuyItNow.value.shopName = shopData.value.shopName;
+    productBuyItNow.value.shopAvatarUrl = shopData.value.shopAvatarUrl;
+    productBuyItNow.value.variationList = product.value.variationList;
+    productBuyItNow.value.productTitle = product.value.productTitle;
+    productBuyItNow.value.productImage = product.value.imageList[0];
+    productBuyItNow.value.provinceId = shopData.value.provinceId;
+    productBuyItNow.value.districtId = shopData.value.districtId;
+    productBuyItNow.value.wardId = shopData.value.wardId;
+    console.log(productBuyItNow.value);
+
+    productBuyItNow.value.personalizationRequired =
+      product.value.personalizationDescription != "";
+
+    console.log(productBuyItNow.value);
+    localStorage.setItem("cartItem", JSON.stringify(productBuyItNow.value));
+    router.push("/customer/checkout");
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 watch(
   () => route.params.id,
@@ -416,6 +571,10 @@ async function fetchData(newProductId) {
     const id = newProductId || productId;
     product.value = await productService.getProductById(id);
 
+    productFromThisShop.value = await shopService.getProductsByShopId(
+      product.value.shopId
+    );
+    console.log(productFromThisShop.value);
     shopData.value = await shopService.getById(product.value.shopId);
     suggestedProductList.value =
       await productRecommendationService.getRecommendations(product.value.id);
@@ -447,11 +606,22 @@ const formatPrice = (price) => {
 
 // Update the format date function to match the image format
 const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const day = date.getDate();
-  const year = date.getFullYear();
-  return `${month} ${day}, ${year}`;
+  const timestamp = parseFloat(dateString) * 1000;
+  const date = new Date(timestamp);
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+const getNomalProductPrice = (product) => {
+  if (product.basePrice > 0) {
+    return product.basePrice;
+  } else if (product.variationList && product.variationList.length > 0) {
+    return product.variationList[0].price;
+  }
+  return 0;
 };
 
 const getProductPrice = (product) => {
@@ -558,6 +728,113 @@ const updatePrice = () => {
 </script>
 
 <style scoped>
+.product-list-container {
+  width: 100%;
+}
+
+.product-list {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #ff9800 #f1f1f1;
+}
+
+.product-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.product-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.product-list::-webkit-scrollbar-thumb {
+  background: #ff9800;
+  border-radius: 10px;
+}
+
+.product-item {
+  min-width: 180px;
+  max-width: 200px;
+  flex: 0 0 auto;
+}
+
+.product-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.image-container {
+  position: relative;
+  height: 180px;
+}
+
+.product-image {
+  height: 100%;
+  object-fit: cover;
+}
+
+.favorite-btn {
+  margin: 8px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.product-title {
+  font-size: 14px;
+  line-height: 1.3;
+  height: 36px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-bottom: 4px;
+}
+
+.shop-name {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.price-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.current-price {
+  font-weight: bold;
+  font-size: 16px;
+  color: #ff9800;
+}
+
+.original-price {
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  font-size: 12px;
+  color: #ff5722;
+}
+
+.ellipsis-2-lines {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 .page-container {
   padding: 20px 30px;
 }
@@ -620,7 +897,7 @@ const updatePrice = () => {
 }
 
 .carousel-item {
-  flex: 0 0 calc(20% - 16px);
+  flex: 0 0 calc(16% - 16px);
   min-width: 200px;
 }
 
@@ -656,6 +933,10 @@ const updatePrice = () => {
   margin: 0 auto;
 }
 
+.review-img {
+  width: 50px;
+  height: auto;
+}
 .reviews-header {
   display: flex;
   justify-content: space-between;
@@ -687,15 +968,26 @@ const updatePrice = () => {
 }
 
 .review-text {
-  font-size: 16px;
+  display: -webkit-box;
+  /* -webkit-line-clamp: 2; */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 1.5;
+  /* max-height: 100%;  */
+  transition: max-height 0.3s ease;
+}
+
+.review-text[expanded] {
+  -webkit-line-clamp: unset;
+  max-height: none;
 }
 
 .reviewer-info {
-  display: flex;
+  /* display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 14px; */
 }
 
 .reviewer-name {

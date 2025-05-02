@@ -1,0 +1,36 @@
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  
+  .animate__animated {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+  }
+  
+  .animate__fadeIn {
+    animation-name: fadeIn;
+  }
+  
+  .animate__fadeOut {
+    animation-name: fadeOut;
+  }
+  
+  .animate__faster {
+    animation-duration: 0.2s;
+  }
+  
+  

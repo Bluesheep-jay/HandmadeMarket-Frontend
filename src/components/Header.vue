@@ -16,32 +16,55 @@
         </q-list>
       </q-btn-dropdown>
 
-      <!-- Tìm kiếm-->
-      <div class="search-input-container">
+      <!-- Tìm kiếm với Dialog de sugerencias mejorado -->
+      <div class="search-input-container" v-click-outside="closeSuggestions">
         <q-input
           rounded
           borderless
           v-model="searchTerm"
-          placeholder="Search for products..."
+          placeholder="Tìm kiếm sản phẩm..."
           debounce="300"
           @update:model-value="fetchSuggestions"
           @keyup.enter="handleSearchByEnter"
+          @focus="showSuggestions = true"
           class="search-input"
         >
           <template v-slot:append>
-            <q-icon class="search-icon" name="search" />
+            <q-icon
+              class="search-icon"
+              name="search"
+              @click="handleSearchByEnter"
+              style="cursor: pointer"
+            />
           </template>
         </q-input>
-        <q-list v-if="suggestions.length" class="suggestion-list">
-          <q-item
-            v-for="(item, index) in suggestions"
-            :key="index"
-            clickable
-            @click="handleSearchByClickItem(item)"
+
+        <transition
+          enter-active-class="animate__animated animate__fadeIn animate__faster"
+          leave-active-class="animate__animated animate__fadeOut animate__faster"
+        >
+          <q-card
+            v-if="showSuggestions && suggestions.length"
+            class="suggestion-dialog"
+            bordered
           >
-            <q-item-section>{{ item }}</q-item-section>
-          </q-item>
-        </q-list>
+            <q-list padding>
+              <q-item
+                v-for="(item, index) in suggestions"
+                :key="index"
+                clickable
+                v-ripple
+                @click="handleSearchByClickItem(item)"
+                dense
+              >
+                <q-item-section avatar>
+                  <q-icon name="search" color="grey" />
+                </q-item-section>
+                <q-item-section>{{ item }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </transition>
       </div>
 
       <!-- Action Icons -->
@@ -85,18 +108,20 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import ProfileDropdown from "./ProfileDropdown.vue";
 
 import categoryService from "../services/category.service";
 import searchingService from "../services/searching.service";
+import productRecommendationService from "../services/productRecommendation.service";
 
 const router = useRouter();
 const searchTerm = ref("");
 const suggestions = ref([]);
 const categoryRootList = ref([]);
 const token = ref(localStorage.getItem("token") || null);
+const showSuggestions = ref(false);
 
 onBeforeMount(async () => {
   try {
@@ -112,12 +137,14 @@ const handleSearchByEnter = () => {
       path: "/customer/product-list",
       query: { q: searchTerm.value },
     });
+    showSuggestions.value = false;
   }
 };
 
 const handleSearchByClickItem = (item) => {
   searchTerm.value = item;
   router.push({ path: "/customer/product-list", query: { q: item } });
+  showSuggestions.value = false;
 };
 
 const fetchSuggestions = async () => {
@@ -125,21 +152,44 @@ const fetchSuggestions = async () => {
     suggestions.value = [];
     return;
   }
+
   try {
+    // const res = await productRecommendationService.seachProduct(searchTerm.value);
+    // console.log(res)
+
     const response = await searchingService.search(searchTerm.value);
     suggestions.value = response;
     suggestions.value = suggestions.value.slice(0, 6);
+
+    if (suggestions.value.length > 0) {
+      showSuggestions.value = true;
+    }
   } catch (error) {
     console.error("Lỗi lấy dữ liệu:", error);
   }
 };
+
+const closeSuggestions = () => {
+  showSuggestions.value = false;
+};
+
+// Cerrar sugerencias cuando se cambia de ruta
+watch(
+  () => router.currentRoute.value,
+  () => {
+    showSuggestions.value = false;
+  }
+);
 </script>
 
 <style scoped>
+@import "../animate/animate.min.css";
+
 .header-container {
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
+
 .toolbar-container {
   .logo {
     font-size: 35px;
@@ -150,9 +200,9 @@ const fetchSuggestions = async () => {
     position: relative;
     flex-grow: 1;
     margin: 0 15px;
+
     .search-input {
       width: 100%;
-
       margin-left: 10px;
       width: 100%;
       border: 2px solid var(--icon);
@@ -166,17 +216,17 @@ const fetchSuggestions = async () => {
         padding: 5px;
       }
     }
-    .suggestion-list {
+
+    .suggestion-dialog {
       position: absolute;
-      top: 70px;
+      top: 100%;
       left: 0;
       width: 100%;
-      padding-top: 10px;
+      margin-top: 5px;
       background: white;
-      box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
-        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-      border-radius: 5px;
-      z-index: 10;
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
   }
 
@@ -188,13 +238,14 @@ const fetchSuggestions = async () => {
     gap: 10px;
   }
 }
+
 .login-btn-container {
   margin-left: 20px;
 }
+
 .btn-login {
   border: none;
   background: none;
-  /* border: 1px solid black; */
   border-radius: 20px;
   padding: 10px 20px;
   margin-right: 10px;
@@ -203,6 +254,7 @@ const fetchSuggestions = async () => {
   font-size: 16px;
   font-weight: 600;
 }
+
 .btn-login:hover {
   cursor: pointer;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,

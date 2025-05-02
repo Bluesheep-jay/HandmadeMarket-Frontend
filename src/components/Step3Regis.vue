@@ -6,7 +6,7 @@
       Hãy đăng bán sản phẩm đầu tiên để khởi đầu hành trình bán hàng cùng HMM
       nào
     </div>
-    <button class="btn" to="/shop">Bắt đầu xây dựng cửa hàng nào</button>
+    <q-btn class="btn" to="/shop">Bắt đầu xây dựng cửa hàng nào</q-btn>
   </div>
 </template>
 

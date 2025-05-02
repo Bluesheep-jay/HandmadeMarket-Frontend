@@ -1,6 +1,6 @@
 <template>
   <div class="step1-container" v-if="shopInfo">
-    <div>
+    <div class="step1-container2">
       <div class="field2-container pickup-address">
         <div class="field2-pickup-address field-container-all">
           <div class="field2-label label-all">Địa chỉ lấy hàng</div>
@@ -40,7 +40,7 @@
           />
         </div>
       </div>
-      <div class="field-container-all">
+      <!-- <div class="field-container-all">
         <div class="label-all">Email</div>
         <div class="input-container-all">
           <q-input
@@ -56,7 +56,7 @@
             type="email"
           />
         </div>
-      </div>
+      </div> -->
     </div>
 
     <div class="btn-save-container q-mt-lg">
@@ -238,6 +238,13 @@ const isFormValid = computed(() => {
 <style scoped>
 .step1-container {
   padding: 0 30px 0 50px;
+  /* border: 1px solid black; */
+  .step1-container2 {
+    margin-top: 20px;
+    padding: 50px 0 0 0;
+    border-bottom: 1px solid black;
+  }
+
   .field-container-all {
     display: flex;
     align-items: center;

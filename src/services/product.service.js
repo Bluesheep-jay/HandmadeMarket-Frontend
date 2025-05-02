@@ -10,6 +10,11 @@ class ProductService {
     return res;
   }
 
+  async getTotal() {
+    const res = await api.get(`${this.path}/total`);
+    return res.data;
+  }
+
   async getProductById(id) {
     const res = (await api.get(`${this.path}/${id}`)).data;
     return res;
@@ -22,6 +27,11 @@ class ProductService {
 
   async getProductBySearchText(q) {
     const res = (await api.get(`${this.path}/searchText?q=${q}`)).data;
+    return res;
+  }
+
+  async getBestSellingProductsForMonth() {
+    const res = (await api.get(`${this.path}/best-sellers`)).data;
     return res;
   }
 

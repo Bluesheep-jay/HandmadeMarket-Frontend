@@ -12,7 +12,7 @@
             v-model="email"
             label="Email"
             type="email"
-            :rules="[(val) => !!val || 'Email is required', isValidEmail]"
+            :rules="[(val) => !!val || 'Email là bắt buộc', isValidEmail]"
           />
 
           <q-input
@@ -20,11 +20,7 @@
             v-model="password"
             label="Mật khẩu"
             :type="isPwd ? 'password' : 'text'"
-            :rules="[
-              (val) => !!val || 'Password is required',
-              (val) =>
-                val.length >= 8 || 'Password must be at least 8 characters',
-            ]"
+            :rules="[(val) => !!val || 'Mật khẩu là bắt buộc']"
           >
             <template v-slot:append>
               <q-icon
@@ -34,11 +30,15 @@
               />
             </template>
           </q-input>
-
+          <div class="d-flex reset-container">
+            <router-link to="#" class="reset-password-link"
+              >Quên mật khẩu?</router-link
+            >
+          </div>
           <div class="register-btn-container">
             <q-btn
               class="register-btn"
-              label="Đăng ký"
+              label="Đăng nhập"
               type="submit"
               color="primary"
             />
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import { useNotification } from "@kyvg/vue3-notification";
 import { useRouter } from "vue-router";
 
@@ -75,9 +75,12 @@ const loginObj = ref(null);
 const isValidEmail = (val) => {
   const emailPattern =
     /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
-  return emailPattern.test(val) || "Invalid email";
+  return emailPattern.test(val) || "Email không hợp lệ";
 };
 
+onBeforeMount(() => {
+  localStorage.clear();
+});
 const onSubmit = async () => {
   if (isValidEmail(email.value) === true && password.value.length >= 0) {
     loginObj.value = {
@@ -86,6 +89,7 @@ const onSubmit = async () => {
     };
     try {
       authStore.clearToken();
+      localStorage.clear();
       const token = await registerService.login(loginObj.value);
 
       if (token) {
@@ -150,5 +154,16 @@ const onSubmit = async () => {
       }
     }
   }
+}
+
+.reset-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+.reset-password-link {
+  top: 0;
+  color: black;
 }
 </style>

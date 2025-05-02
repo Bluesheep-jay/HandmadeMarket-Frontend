@@ -1,6 +1,5 @@
 <template>
   <div class="user-favorites-view q-pa-md">
-    <!-- Header Section -->
     <div class="header-section q-mb-lg" v-if="userInfo">
       <div class="row items-center justify-between">
         <div class="user-info-container row items-center">
@@ -90,7 +89,7 @@
               :key="item.id"
               class="col-12 col-sm-6 col-md-4 col-lg-3"
             >
-              <q-card class="product-card">
+              <q-card class="product-card" >
                 <div @click="navigateToProduct(item)">
                   <div class="image-container">
                     <q-img
@@ -171,56 +170,70 @@
           <div class="text-h6">Thêm địa chỉ</div>
         </q-card-section>
 
-        <q-card-section>
-          <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">Tên người nhận hàng</div>
-            <q-input dense v-model="addressForm.recipientName" outlined />
-          </div>
-
-          <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">Địa chỉ</div>
-            <div class="row q-col-gutter-sm">
-              <div class="col-12 col-sm-4">
-                <q-select
-                  dense
-                  outlined
-                  v-model="tempProvince"
-                  :options="provinceList"
-                  label="Tỉnh/ Thành phố"
-                  @update:model-value="fetchDistricts"
-                />
-              </div>
-              <div class="col-12 col-sm-4">
-                <q-select
-                  dense
-                  outlined
-                  v-model="tempDistrict"
-                  :options="districtList"
-                  label="Quận/ Huyện"
-                  @update:model-value="fetchWards"
-                />
-              </div>
-              <div class="col-12 col-sm-4">
-                <q-select
-                  dense
-                  outlined
-                  v-model="tempWard"
-                  :options="wardList"
-                  label="Xã/ Phường/ Thị trấn"
-                />
-              </div>
+        <q-card-section class="form-container">
+          <div class="col-5 address-form-left">
+            <div
+              v-for="address in addressList"
+              :key="address.id"
+              class="left-item"
+            >
+              <div>{{ address.provinceName }}</div>
+              <div>{{ address.districtName }}</div>
+              <div>{{ address.wardName }}</div>
+              <div>{{ address.specificAddress }}</div>
             </div>
           </div>
+          <div class="col-7 address-form-right">
+            <div class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm">Tên người nhận hàng</div>
+              <q-input dense v-model="addressForm.recipientName" outlined />
+            </div>
 
-          <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">Địa chỉ chi tiết</div>
-            <q-input
-              type="textarea"
-              v-model="addressForm.specificAddress"
-              outlined
-              placeholder="Hãy nhập chi tiết địa chỉ để thuận tiện hơn trong việc lấy hàng"
-              rows="3"
-            />
+            <div class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm">Địa chỉ</div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-12 col-sm-4">
+                  <q-select
+                    dense
+                    outlined
+                    v-model="tempProvince"
+                    :options="provinceList"
+                    label="Tỉnh/ Thành phố"
+                    @update:model-value="fetchDistricts"
+                  />
+                </div>
+                <div class="col-12 col-sm-4">
+                  <q-select
+                    dense
+                    outlined
+                    v-model="tempDistrict"
+                    :options="districtList"
+                    label="Quận/ Huyện"
+                    @update:model-value="fetchWards"
+                  />
+                </div>
+                <div class="col-12 col-sm-4">
+                  <q-select
+                    dense
+                    outlined
+                    v-model="tempWard"
+                    :options="wardList"
+                    label="Xã/ Phường/ Thị trấn"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm">Địa chỉ chi tiết</div>
+              <q-input
+                type="textarea"
+                v-model="addressForm.specificAddress"
+                outlined
+                placeholder="Hãy nhập chi tiết địa chỉ để thuận tiện hơn trong việc lấy hàng"
+                rows="3"
+              />
+            </div>
           </div>
         </q-card-section>
 
@@ -273,9 +286,9 @@ const addressForm = ref({
 const provinceList = ref([]);
 const districtList = ref([]);
 const wardList = ref([]);
-
 const wishList = ref([]);
 const favoriteShops = ref([]);
+const addressList = ref([]);
 const currentTab = ref("wishList");
 
 onBeforeMount(async () => {
@@ -283,7 +296,10 @@ onBeforeMount(async () => {
   userAddress.value = await addressService.getAll();
   addressForm.value.addressOfUserId = userInfo.value.id;
   wishList.value = await usersService.getWishList(userInfo.value.id);
-  console.log(wishList.value);
+  addressList.value = await addressService.getAddressListByUserId(
+    userInfo.value.id
+  );
+  console.log(addressList.value);
   // favoriteShops.value = await usersService.getFavoriteShops(userInfo.value.id);
 
   fetchProvinces();
@@ -307,6 +323,10 @@ async function saveAddress() {
     addressForm.value.wardName = tempWard.value.label;
 
     const res = await addressService.create(addressForm.value);
+
+    addressList.value.push({
+      ...addressForm.value,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -368,6 +388,26 @@ const navigateToProduct = (item) => {
 </script>
 
 <style scoped>
+.form-container {
+  display: flex;
+  .address-form-left {
+    flex: 1;
+    .left-item {
+      border: 1px solid rgb(151, 151, 151);
+      padding: 5px;
+    }
+  }
+  .address-form-right {
+    flex: 2;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    padding: 0 10px;
+    /* align-items: center; */
+    /* justify-content: center; */
+  }
+}
+
 .user-favorites-view {
   max-width: 1200px;
   margin: 0 auto;
@@ -425,6 +465,7 @@ const navigateToProduct = (item) => {
 .products-grid {
   margin-top: 8px;
   margin: 0 0;
+
 }
 
 .product-card {
@@ -433,6 +474,9 @@ const navigateToProduct = (item) => {
   transition: all 0.2s ease;
   height: 100%;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 0 8px;
+
+
 }
 
 .product-card:hover {

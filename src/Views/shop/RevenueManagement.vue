@@ -100,17 +100,8 @@ import { ref, computed, onMounted, onBeforeMount, watch } from "vue";
 import Chart from "chart.js/auto";
 import orderService from "../../services/order.service";
 
-// Data
 const dailyRevenueForMonth = ref([]);
-
-const monthlyRevenueForYear = ref([
-  { month: "2025-01", totalRevenue: 8500000 },
-  { month: "2025-02", totalRevenue: 7800000 },
-  { month: "2025-03", totalRevenue: 6000000 },
-  { month: "2025-04", totalRevenue: 1500000 },
-]);
-
-// Chart references
+const monthlyRevenueForYear = ref([]);
 const dailyChartRef = ref(null);
 const monthlyChartRef = ref(null);
 let dailyChart = null;
@@ -122,7 +113,6 @@ const selectedYear = ref(new Date().getFullYear());
 const selectedMonth = ref(new Date().getMonth() + 1);
 const shopId = ref(localStorage.getItem("shopId"));
 
-// Options for selects
 
 const yearOptions = ref([]);
 
@@ -143,7 +133,6 @@ const monthOptions = [
 
 onBeforeMount(async () => {
   fetchData();
-
   for (let year = new Date().getFullYear(); year >= 2020; year--) {
     yearOptions.value.push(year);
   }

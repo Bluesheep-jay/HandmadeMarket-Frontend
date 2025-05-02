@@ -22,9 +22,12 @@
       </div>
 
       <div class="video-item" v-if="videoUrlBeforeUpload">
-        <q-video :src="videoUrlBeforeUpload" />
+        <q-video :src="videoUrlBeforeUpload"  />
         <button class="delete-btn" @click="removeVideo">🗑️</button>
+        <button class="resize-btn" @click="showDialog = true">X3</button>
+
       </div>
+
       <div
         v-else
         class="upload-placeholder video-placeholder"
@@ -50,6 +53,19 @@
       class="hidden"
       @change="handleVideoUpload"
     />
+    <q-dialog v-model="showDialog" >
+      <q-card style="max-width: 100vw; max-height: 100vh">
+        <q-card-section>
+          <q-video
+            :src="videoUrlBeforeUpload"
+            style="width: 100%; height: 100%"
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Đóng" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -69,7 +85,7 @@ const imgListToUpload = ref([]);
 const videoToUpload = ref(null);
 const fileInput = ref(null);
 const videoInput = ref(null);
-
+const showDialog = ref(false);
 const triggerFileInput = () => fileInput.value.click();
 const triggerVideoInput = () => videoInput.value.click();
 
@@ -182,6 +198,20 @@ const removeVideo = () => {
 }
 .video-placeholder {
   border: 2px dashed #007aff;
+}
+.resize-btn{
+  position: absolute;
+  top: 40px;
+  right: 8px;
+  background: rgba(255, 255, 255, 1);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 .delete-btn {
   position: absolute;

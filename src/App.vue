@@ -20,4 +20,27 @@ export default {
   --btn: #118b50;;
   --acc-bg: rgb(200, 200, 200);
 }
+/* .text-orange-8 {
+  color: #ff8c00 !important;
+}
+
+.bg-orange-8 {
+  background-color: #ff8c00 !important;
+}
+
+.text-orange-3 {
+  color: #ffcc80 !important;
+}
+
+.bg-orange-3 {
+  background-color: #ffcc80 !important;
+}
+
+.text-orange-2 {
+  color: #ffe0b2 !important;
+}
+
+.bg-orange-2 {
+  background-color: #ffe0b2 !important;
+} */
 </style>

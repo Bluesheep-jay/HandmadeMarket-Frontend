@@ -4,6 +4,15 @@ class UserService {
   constructor() {
     this.path = "users";
   }
+
+  async getAllUsers() {
+    const res = (await api.get(`${this.path}`)).data;
+    return res;
+  }
+  async getTotal() {
+    const res = (await api.get(`${this.path}/total`)).data;
+    return res;
+  }
   async getUserByEmail(email) {
     const res = (await api.get(`${this.path}/email/${email}`)).data;
     return res;
@@ -35,7 +44,7 @@ class UserService {
       console.log(err);
     }
   }
-  
+
   async removeFromWishList(userId, productId) {
     const res = (
       await api.delete(
@@ -43,6 +52,10 @@ class UserService {
       )
     ).data;
     return res;
+  }
+
+  async deleteUser(id) {
+    return (await api.delete(`${this.path}/${id}`)).data;
   }
 }
 

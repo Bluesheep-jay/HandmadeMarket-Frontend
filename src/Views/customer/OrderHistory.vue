@@ -190,7 +190,7 @@
                         class="text-h7 text-orange"
                         :class="{ 'text-strike': isOrderPaid(order) }"
                       >
-                        {{ shipmentFee(order) }}</span
+                        {{ order.shippingFee }}</span
                       >
                     </div>
                   </div>
@@ -259,6 +259,35 @@
               type="textarea"
             />
             <q-rating v-model="reviewRating" size="2em" color="yellow" />
+
+            <!-- Upload Images -->
+            <div class="q-mt-md">
+              <q-btn
+                flat
+                color="primary"
+                label="Tải lên hình ảnh"
+                icon="cloud_upload"
+                @click="triggerFileInput"
+              />
+              <input
+                type="file"
+                ref="fileInput"
+                multiple
+                accept="image/*"
+                class="hidden"
+                @change="handleImageUpload"
+              />
+              <div class="uploaded-images q-mt-md">
+                <q-img
+                  v-for="(image, index) in uploadedImages"
+                  :key="index"
+                  :src="image"
+                  class="uploaded-image"
+                  width="80px"
+                  height="80px"
+                />
+              </div>
+            </div>
           </q-card-section>
 
           <q-card-actions align="right">
@@ -268,6 +297,7 @@
         </q-card>
       </q-dialog>
 
+      <!-- // xem đánh giá -->
       <q-dialog v-model="viewReviewDialog">
         <q-card class="review-card">
           <q-card-section>
@@ -295,6 +325,20 @@
               size="2em"
               color="yellow"
             />
+            <div class="q-mt-md">
+              <div class="uploaded-images q-mt-md">
+                <q-img
+                  v-for="(
+                    image, index
+                  ) in selectedViewReviewProduct.reviewImage"
+                  :key="index"
+                  :src="image"
+                  class="uploaded-image"
+                  width="80px"
+                  height="80px"
+                />
+              </div>
+            </div>
           </q-card-section>
 
           <q-card-actions align="right">
@@ -312,6 +356,7 @@ import orderService from "../../services/order.service";
 import orderStatusService from "../../services/orderStatus.service";
 import shopService from "../../services/shop.service";
 import reviewService from "../../services/review.service";
+import cloudinaryService from "../../services/cloudinary.service";
 
 const userId = localStorage.getItem("userId");
 const PENDING_STATUS = "67ca8c309504452e420327c0";
@@ -336,6 +381,7 @@ const selectedItem = ref(null);
 const review = ref({
   reviewRating: 0,
   reviewComment: "",
+  reviewImage: [],
   reviewUserId: 0,
   reviewProductId: 0,
   reviewCreatedDate: null,
@@ -344,11 +390,14 @@ const review = ref({
 const selectedViewReviewProduct = ref();
 
 const reviewList = ref([]);
+const uploadedImages = ref([]);
+const fileInput = ref(null);
 
 onBeforeMount(async () => {
   try {
     orders.value = await orderService.getAllOrderWithProductByUserId(userId);
     orderStatuses.value = await orderStatusService.getAll();
+    console.log(orders.value);
 
     reviewList.value = await reviewService.getReviewByUserId(userId);
 
@@ -423,6 +472,7 @@ const submitReview = async () => {
     reviewList.value.push({ ...review.value });
     reviewContent.value = "";
     reviewRating.value = 0;
+    uploadedImages.value = [];
 
     reviewDialog.value = false;
   } catch (error) {
@@ -444,6 +494,27 @@ const viewReview = (item) => {
     if (item.productId === review.reviewProductId) {
       selectedViewReviewProduct.value = review;
     }
+  }
+  console.log(selectedViewReviewProduct.value);
+};
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const handleImageUpload = async (event) => {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+
+  try {
+    for (const file of files) {
+      const res = await cloudinaryService.uploadImage(file);
+      uploadedImages.value.push(res); 
+      review.value.reviewImage.push(res); 
+      console.log(res);
+    }
+  } catch (error) {
+    console.error("Lỗi khi upload hình ảnh:", error);
   }
 };
 
@@ -537,5 +608,26 @@ const canBuyAgain = (order) => {
 .ship-fee {
   display: flex;
   justify-content: right;
+}
+
+.hidden {
+  display: none;
+}
+
+.uploaded-images {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.uploaded-image {
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.uploaded-image:hover {
+  transform: scale(1.1);
 }
 </style>

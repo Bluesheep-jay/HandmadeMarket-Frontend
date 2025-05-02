@@ -12,7 +12,7 @@
             v-model="email"
             label="Email"
             type="email"
-            :rules="[(val) => !!val || 'Email is required', isValidEmail]"
+            :rules="[(val) => !!val || 'email là bắt buộc', isValidEmail]"
           />
 
           <q-input
@@ -21,9 +21,8 @@
             label="Mật khẩu"
             :type="isPwd ? 'password' : 'text'"
             :rules="[
-              (val) => !!val || 'Password is required',
-              (val) =>
-                val.length >= 8 || 'Password must be at least 8 characters',
+              (val) => !!val || 'Mật khẩu là bắt buộc',
+              (val) => val.length >= 8 || 'Mật khẩu phải có ít nhất 8 ký tự',
             ]"
           >
             <template v-slot:append>
@@ -35,6 +34,17 @@
             </template>
           </q-input>
 
+          <q-input
+            filled
+            v-model="confirmPassword"
+            label="Nhập lại mật khẩu"
+            :type="isPwd ? 'password' : 'text'"
+            :rules="[
+              (val) => !!val || 'Mật khẩu là bắt buộc',
+              (val) => val === password || 'Mật khẩu không khớp',
+            ]"
+          />
+
           <div class="register-btn-container">
             <q-btn class="register-btn" label="Đăng ký" type="submit" color="primary" />
           </div>
@@ -43,6 +53,7 @@
     </q-card>
   </div>
 </template>
+
 
 <script>
 import { ref } from "vue";
@@ -57,13 +68,14 @@ export default {
     const router = useRouter()
     const email = ref("");
     const password = ref("");
+    const confirmPassword = ref("");
     const isPwd = ref(true);
     const registerObj = ref(null);
 
     const isValidEmail = (val) => {
       const emailPattern =
         /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
-      return emailPattern.test(val) || "Invalid email";
+      return emailPattern.test(val) || "Email không hợp lệ";
     };
 
     const onSubmit = async () => {
@@ -100,6 +112,7 @@ export default {
       isPwd,
       isValidEmail,
       onSubmit,
+      confirmPassword
     };
   },
 };

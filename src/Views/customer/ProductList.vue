@@ -1,140 +1,161 @@
 <template>
   <q-page padding>
     <!-- Header Section -->
-    <div class="row items-center justify-between q-mb-lg">
+    <div class="row items-center justify-between q-mb-md">
       <div class="text-h5">Handmade Market</div>
-      <q-btn flat color="primary" label="See more" />
     </div>
 
-    <!-- Product Grid -->
-    <div
-      class="row q-col-gutter-lg product-list-container"
-      v-if="products.length > 0"
-    >
-      <div
-        v-for="product in products"
-        :key="product.id"
-        class="col-12 col-sm-6 col-md-3 col-lg-3"
-      >
-        <q-card class="product-card cursor-pointer" v-if="product.imageList">
-          <!-- Main Image -->
-          <q-btn
-            icon="favorite_border"
-            color="red"
-            text-color="white"
-            round
-            unelevated
-            size="md"
-            class="absolute-top-right q-ma-sm favorite-btn"
-            @click.stop="addtoWishlist(product)"
+    <div class="row q-col-gutter-md">
+      <!-- Filters Sidebar - Giảm kích thước xuống -->
+      <div class="col-12 col-md-2">
+        <div class="filter-container">
+          <!-- Price Filter -->
+          <PriceFilter
+            :products="products"
+            @filter-products="handleFilteredProducts"
           />
-          <q-img
-            @click="navigateToProduct(product.id)"
-            :src="product.imageList[0]"
-            :ratio="4 / 3"
-            class="product-image"
-          >
-            <template v-slot:loading>
-              <q-spinner-dots color="white" />
-            </template>
-          </q-img>
 
-          <q-card-section>
-            <div
-              class="text-subtitle2 ellipsis-2-lines"
-              @click="navigateToProduct(product.id)"
-            >
-              {{ product.productTitle }}
-            </div>
-
-            <!-- <div class="text-caption text-grey q-mb-sm">
-              {{ getShopName(product.shopId) }}
-            </div> -->
-
-            <!-- Rating -->
-            <div class="row">
-              <div class="q-mr-lg">
-                <div class="row items-center q-gutter-x-sm">
-                  <q-rating
-                    v-model="product.rating"
-                    size="1em"
-                    color="amber"
-                    readonly
-                    icon-selected="star"
-                    icon-half="star_half"
-                  />
-                  <span class="text-caption text-grey">
-                    ({{ product.rating || 0 }})
-                  </span>
-                </div>
-
-                <!-- Price -->
-                <div
-                  class="row items-center q-gutter-x-sm q-mt-sm"
-                  v-if="
-                    product.variationList && product.variationList.length > 0
-                  "
-                >
-                  <div class="text-subtitle1 text-weight-bold">
-                    {{ formatPrice(getLowestPrice(product.variationList)) }}
-                  </div>
-                  <div
-                    v-if="hasDiscount(product)"
-                    class="text-caption text-grey text-line-through"
-                  >
-                    {{ formatPrice(getOriginalPrice(product.variationList)) }}
-                  </div>
-                  <q-badge
-                    v-if="hasDiscount(product)"
-                    color="negative"
-                    text-color="white"
-                  >
-                    {{ calculateDiscount(product) }}% off
-                  </q-badge>
-                </div>
-                <div class="row items-center q-gutter-x-sm q-mt-sm" v-else>
-                  <div class="text-subtitle1 text-weight-bold">
-                    {{ formatPrice(product.basePrice) }}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <q-btn
-                  icon="shopping_cart"
-                  color="black"
-                  text-color="white"
-                  label="Thêm vào giỏ hàng"
-                  class="full-width"
-                  size="md"
-                  @click="addToCart(product)"
-                />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
+          <!-- Có thể thêm các bộ lọc khác ở đây -->
+        </div>
       </div>
-    </div>
 
-    <!-- Load More Button -->
-    <div class="flex flex-center q-mt-lg">
-      <q-btn
-        color="primary"
-        label="Load more"
-        :loading="loading"
-        @click="loadMore"
-      />
+      <!-- Product Grid - Tăng kích thước lên -->
+      <div class="col-12 col-md-10">
+        <div
+          class="row q-col-gutter-md product-list-container"
+          v-if="paginatedProducts.length > 0"
+        >
+          <div
+            v-for="product in paginatedProducts"
+            :key="product.id"
+            class="col-12 col-sm-6 col-md-4"
+          >
+            <q-card
+              class="product-card cursor-pointer"
+              v-if="product.imageList"
+            >
+              <!-- Main Image -->
+              <q-btn
+                icon="favorite_border"
+                color="red"
+                text-color="white"
+                round
+                unelevated
+                size="md"
+                class="absolute-top-right q-ma-sm favorite-btn"
+                @click.stop="addtoWishlist(product)"
+              />
+              <q-img
+                @click="navigateToProduct(product.id)"
+                :src="product.imageList[0]"
+                :ratio="4 / 3"
+                class="product-image"
+              >
+                <template v-slot:loading>
+                  <q-spinner-dots color="white" />
+                </template>
+              </q-img>
+
+              <q-card-section>
+                <div
+                  class="text-subtitle2 ellipsis-2-lines"
+                  @click="navigateToProduct(product.id)"
+                >
+                  {{ product.productTitle }}
+                </div>
+
+                <!-- Rating -->
+                <div class="row">
+                  <div class="q-mr-lg">
+                    <div class="row items-center q-gutter-x-sm">
+                      <q-rating
+                        v-model="product.rating"
+                        size="1em"
+                        color="amber"
+                        readonly
+                        icon-selected="star"
+                        icon-half="star_half"
+                      />
+                      <span class="text-caption text-grey">
+                        ({{ product.rating || 0 }})
+                      </span>
+                    </div>
+
+                    <!-- Price -->
+                    <div
+                      class="row items-center q-gutter-x-sm q-mt-sm"
+                      v-if="
+                        product.variationList &&
+                        product.variationList.length > 0
+                      "
+                    >
+                      <div class="text-subtitle1 text-weight-bold">
+                        {{ formatPrice(getLowestPrice(product.variationList)) }}
+                      </div>
+                    </div>
+                    <div class="row items-center q-gutter-x-sm q-mt-sm" v-else>
+                      <div class="text-subtitle1 text-weight-bold">
+                        {{ formatPrice(product.basePrice) }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <q-btn
+                      icon="shopping_cart"
+                      color="black"
+                      text-color="white"
+                      label="Thêm vào giỏ hàng"
+                      class="full-width"
+                      size="sm"
+                      @click="addToCart(product)"
+                    />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="empty-state q-pa-lg text-center">
+          <q-icon name="search_off" size="5rem" color="grey-5" />
+          <div class="text-h6 q-mt-md">Không tìm thấy sản phẩm</div>
+          <div class="text-grey">Vui lòng thử lại với bộ lọc khác</div>
+          <q-btn
+            label="Xóa bộ lọc"
+            color="orange"
+            class="q-mt-md"
+            @click="resetFilters"
+          />
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="flex flex-center q-mt-lg"
+          v-if="paginatedProducts.length > 0"
+        >
+          <q-pagination
+            v-model="currentPage"
+            :max="totalPages"
+            boundary-numbers
+            @update:model-value="updatePaginatedProducts"
+          />
+        </div>
+      </div>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useNotification } from "@kyvg/vue3-notification";
+import PriceFilter from "./PriceFilter.vue";
 
 import productService from "../../services/product.service";
 import cartService from "../../services/cart.service";
+import productRecommendationService from "../../services/productRecommendation.service";
 
 const { notify } = useNotification();
 const router = useRouter();
@@ -143,10 +164,15 @@ const searchQuery = ref(route.query.q);
 const seachCategoryId = ref(route.params.id);
 const cartId = localStorage.getItem("cartId");
 const products = ref([]);
+const filteredProducts = ref([]);
+const paginatedProducts = ref([]);
 const loading = ref(false);
 const page = ref(1);
+const currentPage = ref(1);
+const totalPages = ref(1);
 const selectedProduct = ref(null);
 const favoriteProducts = ref(new Set());
+const itemsPerPage = 9; // Thay đổi từ 8 lên 9 sản phẩm trên mỗi trang
 
 const cartItem = ref({
   productId: "",
@@ -173,12 +199,11 @@ const addtoWishlist = (product) => {
     favoriteProducts.value.add(product.id);
   }
 };
-const loadProducts = async () => {
-  loading.value = true;
 
+const loadProducts = async () => {
   try {
     if (searchQuery.value) {
-      products.value = await productService.getProductBySearchText(
+      products.value = await await productRecommendationService.seachProduct(
         searchQuery.value
       );
     }
@@ -188,29 +213,37 @@ const loadProducts = async () => {
       );
     }
 
-    console.log(products.value);
+    // Khởi tạo filteredProducts với tất cả sản phẩm
+    filteredProducts.value = [...products.value];
+    updatePagination();
   } catch (error) {
     console.error("Error loading products:", error);
   }
   loading.value = false;
 };
 
+// Xử lý sản phẩm đã lọc từ component PriceFilter
+const handleFilteredProducts = (filtered) => {
+  filteredProducts.value = filtered;
+  currentPage.value = 1; // Reset về trang đầu tiên khi lọc
+  updatePagination();
+};
+
+// Cập nhật thông tin phân trang
+const updatePagination = () => {
+  totalPages.value = Math.ceil(filteredProducts.value.length / itemsPerPage);
+  updatePaginatedProducts();
+};
+
+// Reset bộ lọc
+const resetFilters = () => {
+  filteredProducts.value = [...products.value];
+  updatePagination();
+};
+
 async function addToCart(product) {
   selectedProduct.value = product;
   try {
-    // if (
-    //   product.value.personalizationDescription &&
-    //   !cartItem.value.personalizationOfClient.trim()
-    // ) {
-    //   personalError.value = true;
-    //   personalErrorMessage.value = "Vui lòng nhập nội dung cá nhân hóa!";
-    //   return;
-    // } else {
-    //   personalError.value = false;
-    //   personalErrorMessage.value = "";
-    // }
-    console.log(selectedProduct.value);
-
     cartItem.value.productId = selectedProduct.value.id;
 
     if (product.variationList) {
@@ -225,7 +258,6 @@ async function addToCart(product) {
 
     cartItem.value.personalizationRequired =
       product.personalizationDescription != "";
-    console.log(cartItem.value);
 
     const res = await cartService.addToCart(cartId, cartItem.value);
     notify({
@@ -238,6 +270,7 @@ async function addToCart(product) {
     console.log(error);
   }
 }
+
 watch(
   () => route.query.q,
   (newQuery) => {
@@ -246,9 +279,10 @@ watch(
   }
 );
 
-const loadMore = async () => {
-  page.value++;
-  await loadProducts();
+const updatePaginatedProducts = () => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  paginatedProducts.value = filteredProducts.value.slice(startIndex, endIndex);
 };
 
 function navigateToProduct(productId) {
@@ -280,17 +314,20 @@ function hasDiscount(product) {
 }
 
 const calculateDiscount = (product) => {
-  //   const lowest = getLowestPrice(product.variationList);
-  //   const original = getOriginalPrice(product.variationList);
-  //   return Math.round((1 - lowest / original) * 100);
   return 0;
 };
 </script>
 
 <style scoped>
-.product-list-container {
-  padding: 0 10px;
+.filter-container {
+  position: sticky;
+  top: 20px;
 }
+
+.product-list-container {
+  padding: 0 5px;
+}
+
 .product-card {
   transition: all 0.3s ease;
 }
@@ -318,16 +355,28 @@ const calculateDiscount = (product) => {
 }
 
 .favorite-btn {
-  /* position: absolute; */
-  /* top: -10px;  */
   right: 5px;
-  z-index: 10; 
-  transform: scale(1.1); /* Làm nó to lên một chút */
+  z-index: 10;
+  transform: scale(1.1);
   transition: transform 0.2s ease-in-out;
 }
 
 .favorite-btn:hover {
-  transform: scale(1.3); /* Hiệu ứng phóng to khi hover */
+  transform: scale(1.3);
 }
 
+.empty-state {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+@media (max-width: 768px) {
+  .filter-container {
+    position: relative;
+    top: 0;
+    margin-bottom: 10px;
+  }
+}
 </style>

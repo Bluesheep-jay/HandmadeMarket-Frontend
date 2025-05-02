@@ -37,7 +37,7 @@
             color="primary"
             class="follow-shop-btn q-mb-md"
             icon-right="favorite"
-            label="Following shop"
+            label="Theo dõi"
           />
 
           <!-- Metrics Cards -->
@@ -47,9 +47,11 @@
                 <div class="text-center">
                   <q-icon name="speed" color="purple" size="sm" />
                 </div>
-                <div class="text-center text-weight-medium">Speedy replies</div>
+                <div class="text-center text-weight-medium">
+                  Tốc độ phản hồi
+                </div>
                 <div class="text-center text-caption">
-                  Has a history of replying to messages quickly.
+                  Tốc độ phản hồi nhanh theo đánh giá từ khách hàng
                 </div>
               </div>
             </div>
@@ -60,7 +62,7 @@
                 </div>
                 <div class="text-center text-weight-medium">Rave reviews</div>
                 <div class="text-center text-caption">
-                  Average review rating is 4.8 or higher
+                  <!-- Average review rating is 4.8 or higher -->
                 </div>
               </div>
             </div>
@@ -77,7 +79,7 @@
             <div class="row justify-between items-center q-mb-sm">
               <div class="text-weight-medium">Mô tả</div>
               <div class="text-caption">
-                Last updated on {{ formatDate(new Date()) }}
+                Cập nhật lần cuối {{ formatDate(new Date()) }}
               </div>
             </div>
             <div class="announcement-text q-mb-sm">
@@ -98,10 +100,10 @@
         indicator-color="black"
         narrow-indicator
       >
-        <q-tab name="items" label="Items" />
-        <q-tab name="reviews" label="Reviews" />
-        <q-tab name="about" label="About" />
-        <q-tab name="policies" label="Shop Policies" />
+        <q-tab name="items" label="Sản phẩm" />
+        <q-tab name="reviews" label="Đánh giá" />
+        <q-tab name="about" label="Về chúng tôi" />
+        <q-tab name="policies" label="Chính sách của cửa hàng" />
       </q-tabs>
 
       <!-- Search Bar -->
@@ -109,7 +111,7 @@
         v-model="searchQuery"
         outlined
         dense
-        placeholder="Search all items"
+        placeholder="Tìm kiếm sản phẩm"
         class="search-input q-mt-sm"
       >
         <template v-slot:append>
@@ -131,7 +133,7 @@
             @click="selectedCategory = 'all'"
             active-class="active-category"
           >
-            <q-item-section>All</q-item-section>
+            <q-item-section>Tất cả</q-item-section>
             <q-item-section side>{{ productList.length }}</q-item-section>
           </q-item>
 
@@ -143,7 +145,7 @@
             @click="selectedCategory = 'best-sellers'"
             active-class="active-category"
           >
-            <q-item-section>Best Sellers</q-item-section>
+            <q-item-section>Sản phẩm bán chạy</q-item-section>
             <q-item-section side>{{
               Math.ceil(productList.length * 0.6)
             }}</q-item-section>
@@ -170,7 +172,7 @@
               color="grey-8"
               class="full-width q-mb-sm"
               icon="design_services"
-              label="Request Custom Order"
+              label="Yêu cầu sản phẩm cá nhân"
               no-caps
             />
             <q-btn
@@ -178,19 +180,13 @@
               color="grey-8"
               class="full-width"
               icon="chat"
-              label="Contact shop owner"
+              label="Liên hệ với người bán"
               no-caps
             />
           </div>
 
           <!-- Shop Stats -->
           <div class="shop-stats q-mt-lg">
-            <div class="text-caption q-mb-xs">
-              {{ formatSalesCount(productList.length * 200) }} Sales
-            </div>
-            <div class="text-caption">
-              {{ Math.floor(productList.length * 60) }} Admirers
-            </div>
             <q-separator class="q-my-md" />
             <q-btn
               flat
@@ -198,7 +194,7 @@
               color="grey-7"
               class="no-padding"
               icon="flag"
-              label="Report this shop to Etsy"
+              label="Báo cáo với Hmm"
               no-caps
             />
           </div>
@@ -236,20 +232,12 @@
                 class="product-image"
               >
                 <!-- Cart Badge -->
-                <div
-                  class="cart-badge"
-                  v-if="getRandomCartCount(product.id) > 0"
-                >
-                  In {{ getRandomCartCount(product.id) }} carts
-                </div>
+                <div class="cart-badge">Giỏ hàng 0</div>
 
                 <!-- Rating Badge -->
                 <div class="rating-badge">
                   <q-icon name="star" size="xs" />
-                  {{
-                    product.rating ||
-                    (Math.floor(Math.random() * 10) / 2 + 3.5).toFixed(1)
-                  }}
+                  {{ product.rating }}
                 </div>
               </q-img>
 
@@ -258,24 +246,15 @@
                 <div class="product-title ellipsis-2-lines">
                   {{ product.productTitle }}
                 </div>
-                <div class="product-id text-caption text-grey">
-                  {{ product.id.substring(0, 8) }}
-                </div>
+
                 <div class="product-price q-mt-xs">
                   <span class="text-weight-bold">{{
                     formatPrice(getProductPrice(product))
                   }}</span>
                 </div>
-                <div class="product-shipping text-caption q-mt-xs">
-                  Shipping:
-                  {{ Math.random() > 0.5 ? "Free" : formatPrice(50000) }}
-                </div>
-                <div class="product-delivery text-caption">
-                  Est. delivery: {{ getRandomDeliveryDate() }}
-                </div>
+
                 <div class="product-returns text-caption">
-                  Returns:
-                  {{ Math.random() > 0.3 ? "Accepted" : "Not accepted" }}
+                  Miễn phí trả hàng
                 </div>
 
                 <!-- Options Badge -->
@@ -307,24 +286,22 @@ import shopService from "../../services/shop.service";
 const shop = ref(null);
 const productList = ref([]);
 const collectionList = ref([
-  { id: "nature", name: "Nature & Animals", productIds: [] },
-  { id: "jewelry", name: "Quote Jewelry", productIds: [] },
-  { id: "galaxy", name: "Galaxy Jewelry", productIds: [] },
+  { id: "", name: "Áo dài nữ", productIds: [] },
+  { id: "jewelry", name: "Mẹ và bé", productIds: [] },
 ]);
 
 // UI state
 const activeTab = ref("items");
 const searchQuery = ref("");
 const selectedCategory = ref("all");
-const sortOption = ref("Most Recent");
+const sortOption = ref("Mới nhất");
 const sortOptions = [
-  "Most Recent",
-  "Lowest Price",
-  "Highest Price",
-  "Top Customer Reviews",
+  "Mới nhất",
+  "Giá thấp nhất",
+  "Giá cao nhất",
+  "Đánh giá cao nhất",
 ];
 
-// Random cart counts for products (simulating "In X carts" badges)
 const cartCounts = ref({});
 
 const route = useRoute();
@@ -407,13 +384,13 @@ const filteredProducts = computed(() => {
 
   // Sort products
   switch (sortOption.value) {
-    case "Lowest Price":
+    case "Giá thấp nhất":
       filtered.sort((a, b) => getProductPrice(a) - getProductPrice(b));
       break;
-    case "Highest Price":
+    case "Giá cao nhất":
       filtered.sort((a, b) => getProductPrice(b) - getProductPrice(a));
       break;
-    case "Top Customer Reviews":
+    case "Đánh giá cao nhất":
       filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       break;
     default: // Most Recent
@@ -447,7 +424,7 @@ function formatSalesCount(count) {
 }
 
 function formatDate(date) {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("vi-VN", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -548,7 +525,7 @@ function getCategoryTitle() {
   justify-content: right;
   align-items: center;
   .nav-tab {
-    margin-right: 250px;
+    margin-right: 100px;
   }
 }
 

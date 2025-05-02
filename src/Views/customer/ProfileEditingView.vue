@@ -6,17 +6,32 @@
           <!-- Profile Picture -->
           <div class="col-8 profile-picture-container">
             <div class="profile-picture-section">
-              <q-avatar size="150px">
-                <img
-                  :src="
-                    profileImage ||
-                    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-5Br92ncNaJsaUNoh8yNkgHJk1uw3nW.png'
-                  "
-                />
-              </q-avatar>
+              <div class="btn-img-container">
+                <div class="col-7">
+                  <q-avatar size="150px">
+                    <img
+                      :src="
+                        profileImage ||
+                        'https://cdn.quasar.dev/img/boy-avatar.png'
+                      "
+                    />
+                  </q-avatar>
+                </div>
+                <div class="btn-container col-5">
+                  <div class="save-btn">
+                    <q-btn
+                      color="primary"
+                      label="Lưu thay đổi"
+                      @click="saveProfile"
+                      class="q-mt-lg"
+                    />
+                  </div>
+                  <q-btn class="out-btn" to="/customer/profile">Thoát</q-btn>
+                </div>
+              </div>
               <div class="upload-section q-mt-sm">
                 <div class="picture-title-container">
-                  <div class="custom-text">Profile Picture</div>
+                  <div class="custom-text">Hình đại diện</div>
                   <q-file
                     outlined
                     dense
@@ -66,16 +81,6 @@
                 class="phonenumber-input"
               />
             </div>
-          </div>
-
-          <!-- Save Button -->
-          <div class="save-btn">
-            <q-btn
-              color="primary"
-              label="Save Changes"
-              @click="saveProfile"
-              class="q-mt-lg"
-            />
           </div>
         </div>
       </q-card-section>
@@ -169,7 +174,7 @@ const handleImageUpload = (file) => {
 
 const saveProfile = async () => {
   try {
-    userData.avatarUrl = profileImage.value
+    userData.avatarUrl = profileImage.value;
     const res = await usersService.updateInfo(userData.id, userData);
     console.log(res);
     notify({
@@ -179,7 +184,7 @@ const saveProfile = async () => {
       duration: 2000,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     notify({
       title: "Error",
       text: "Cập nhật thất bại!",
@@ -209,12 +214,34 @@ const saveProfile = async () => {
       width: 150px;
     }
   }
+  .avatar-container {
+    width: 300px;
+  }
+  .btn-container {
+    width: 300px;
+  }
   .save-btn {
+    width: 200px;
+    position: absolute;
+    bottom: 10px;
+    right: 30px;
     margin-left: 50px;
+  }
+  .out-btn {
+    position: absolute;
+    background: rgb(85, 85, 85);
+    color: white;
+    bottom: 10px;
+    right: 0;
   }
 }
 
 /* MY */
+.btn-img-container {
+  display: flex;
+  position: relative;
+}
+
 .profile-picture-container {
   .profile-picture-section {
     display: flex;
